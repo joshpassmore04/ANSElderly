@@ -15,4 +15,4 @@ class Gate(Base):
     opening_time: Mapped[datetime] = mapped_column()
 
     location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"), nullable=False)
-    location: Mapped["Location"] = relationship("Location", backref="gate")
+    location: Mapped["Location"] = relationship("Location", back_populates="gate")
