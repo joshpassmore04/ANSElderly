@@ -1,0 +1,27 @@
+from data.airport_data import AirportData
+from data.user_data import UserData
+from orm.user.luggage import Luggage
+
+
+class TravellerService:
+    def __init__(self, user_data: UserData, airport_data: AirportData):
+        self.user_data = user_data
+        self.airport_data = airport_data
+    def verify_passport(self, traveller_id: int):
+        traveller = self.user_data.get_traveller_by_id(traveller_id)
+        traveller.verify_passport()
+        self.user_data.save_traveller(traveller)
+    def add_luggage(self, traveller_id: int, luggage: Luggage):
+        traveller = self.user_data.get_traveller_by_id(traveller_id)
+        traveller.add_to_luggage(luggage)
+        self.user_data.save_traveller(traveller)
+    def remove_luggage(self, traveller_id: int, luggage_id: int):
+        traveller = self.user_data.get_traveller_by_id(traveller_id)
+        luggage = self.airport_data.get_luggage_by_id(luggage_id)
+        traveller.remove_from_luggage(luggage)
+        self.user_data.save_traveller(traveller)
+    def add_flight_to(self, traveller_id: int, flight_id: int):
+        flight = self.airport_data.get_flight_by_id(flight_id)
+        traveller = self.user_data.get_traveller_by_id(traveller_id)
+        flight.add_traveller(traveller)
+        self.user_data.save_traveller(traveller)
