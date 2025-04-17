@@ -13,7 +13,6 @@ class Traveller(User):
 
     __tablename__ = "traveller"
     id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    user: Mapped["User"] = relationship("User")
     passport_verified: Mapped[bool] = mapped_column(default=False)
     luggage_items: Mapped[List["Luggage"]] = relationship(
         "Luggage", back_populates="owner", cascade="all, delete-orphan"
@@ -22,6 +21,10 @@ class Traveller(User):
     flight: Mapped["Flight"] = relationship(
         back_populates="travellers"
     )
+
+    __mapper_args__ = {
+        "polymorphic_identity": "traveller"
+    }
 
     def verify_passport(self):
         self.passport_verified = True

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from data.airport_data import AirportData
 from data.user_data import UserData
 from orm.user.luggage import Luggage
@@ -7,27 +9,47 @@ class TravellerService:
     def __init__(self, user_data: UserData, airport_data: AirportData):
         self.user_data = user_data
         self.airport_data = airport_data
+
     def verify_passport(self, traveller_id: int):
         traveller = self.user_data.get_traveller_by_id(traveller_id)
+        if traveller is None:
+            raise ValueError(f"Traveller with ID {traveller_id} not found.")
         traveller.verify_passport()
         self.user_data.save_traveller(traveller)
+
     def add_luggage(self, traveller_id: int, luggage: Luggage):
         traveller = self.user_data.get_traveller_by_id(traveller_id)
+        if traveller is None:
+            raise ValueError(f"Traveller with ID {traveller_id} not found.")
         traveller.add_to_luggage(luggage)
         self.user_data.save_traveller(traveller)
+
     def remove_luggage(self, traveller_id: int, luggage_id: int):
         traveller = self.user_data.get_traveller_by_id(traveller_id)
+        if traveller is None:
+            raise ValueError(f"Traveller with ID {traveller_id} not found.")
         luggage = self.airport_data.get_luggage_by_id(luggage_id)
+        if luggage is None:
+            raise ValueError(f"Luggage with ID {luggage_id} not found.")
         traveller.remove_from_luggage(luggage)
         self.user_data.save_traveller(traveller)
+
     def add_flight_to(self, traveller_id: int, flight_id: int):
         flight = self.airport_data.get_flight_by_id(flight_id)
+        if flight is None:
+            raise ValueError(f"Flight with ID {flight_id} not found.")
         traveller = self.user_data.get_traveller_by_id(traveller_id)
+        if traveller is None:
+            raise ValueError(f"Traveller with ID {traveller_id} not found.")
         flight.add_traveller(traveller)
         self.airport_data.save_flight(flight)
+
     def remove_flight_from(self, traveller_id: int, flight_id: int):
         flight = self.airport_data.get_flight_by_id(flight_id)
+        if flight is None:
+            raise ValueError(f"Flight with ID {flight_id} not found.")
         traveller = self.user_data.get_traveller_by_id(traveller_id)
+        if traveller is None:
+            raise ValueError(f"Traveller with ID {traveller_id} not found.")
         flight.remove_traveller(traveller)
         self.airport_data.save_flight(flight)
-

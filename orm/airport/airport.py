@@ -15,4 +15,4 @@ class Airport(Base):
 
     location: Mapped["Location"] = relationship("Location", back_populates="airports")
 
-    flights: Mapped[List["Flight"]] = relationship("Flight", back_populates="destination", cascade="all, delete-orphan")
+    flights: Mapped[list["Flight"]] = relationship("Flight", back_populates="destination", cascade="all, delete-orphan")

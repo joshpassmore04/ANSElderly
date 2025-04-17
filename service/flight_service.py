@@ -16,4 +16,6 @@ class FlightService:
         for flight in flights:
             self.flight_cache[flight.id] = flight
         return flights
-    def
+    def add_flight(self, flight: Flight):
+        self.flight_cache[flight.id] = flight
+        self.airport_data.save_flight(flight)
