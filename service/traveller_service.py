@@ -24,4 +24,10 @@ class TravellerService:
         flight = self.airport_data.get_flight_by_id(flight_id)
         traveller = self.user_data.get_traveller_by_id(traveller_id)
         flight.add_traveller(traveller)
-        self.user_data.save_traveller(traveller)
+        self.airport_data.save_flight(flight)
+    def remove_flight_from(self, traveller_id: int, flight_id: int):
+        flight = self.airport_data.get_flight_by_id(flight_id)
+        traveller = self.user_data.get_traveller_by_id(traveller_id)
+        flight.remove_traveller(traveller)
+        self.airport_data.save_flight(flight)
+
