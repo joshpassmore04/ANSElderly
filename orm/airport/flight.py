@@ -1,8 +1,9 @@
-import datetime
+from datetime import datetime
 from typing import List
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlmodel import SQLModel
 
 from orm import Base, flight_airport_lnk
 from orm.airport.airport import Airport
@@ -10,7 +11,7 @@ from orm.airport.gate import Gate
 from orm.user.traveller import Traveller
 
 
-class Flight(Base):
+class Flight(SQLModel):
 
     __tablename__ = "flight"
 
@@ -42,4 +43,5 @@ class Flight(Base):
 
     def remove_traveller(self, traveller: Traveller):
         self.travellers.remove(traveller)
+
 

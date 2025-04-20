@@ -2,6 +2,7 @@ from datetime import datetime
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
+from orm.airport.aircraft import Aircraft
 from orm.airport.airport import Airport
 from orm.airport.flight import Flight
 from orm.user.luggage import Luggage
@@ -12,6 +13,10 @@ class AirportData(ABC):
 
     @abstractmethod
     def get_flight_by_id(self, flight_id: int) -> Optional[Flight]:
+        pass
+
+    @abstractmethod
+    def get_airport_by_id(self, airport_id: int) -> Optional[Airport]:
         pass
 
     @abstractmethod
@@ -32,6 +37,14 @@ class AirportData(ABC):
 
     @abstractmethod
     def register_flight(self, aircraft_id: int, to_airport_id: int, arrival_time: datetime, departure_time: datetime = datetime.now()) -> Flight:
+        pass
+
+    @abstractmethod
+    def register_airport(self, name: str, longitude: float = 0, latitude: float = 0) -> Airport:
+        pass
+
+    @abstractmethod
+    def register_aircraft(self, name: str, longitude: float = 0, latitude: float = 0) -> Aircraft:
         pass
 
     @abstractmethod

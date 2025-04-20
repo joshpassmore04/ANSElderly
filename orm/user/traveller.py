@@ -17,7 +17,8 @@ class Traveller(User):
     luggage_items: Mapped[List["Luggage"]] = relationship(
         "Luggage", back_populates="owner", cascade="all, delete-orphan"
     )
-
+    
+    flight_id: Mapped[int] = mapped_column(ForeignKey("flights.id"))
     flight: Mapped["Flight"] = relationship(
         back_populates="travellers"
     )

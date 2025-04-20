@@ -30,13 +30,9 @@ class UserData(ABC):
     def save_user(self, user: User):
         pass
 
-    @abstractmethod
-    def save_traveller(self, traveller: Traveller):
-        pass
-
     # TODO: Make sure this change cascades
     @abstractmethod
-    def delete_user(self, user_id: int):
+    def delete_user_by_id(self, user_id: int):
         pass
 
 

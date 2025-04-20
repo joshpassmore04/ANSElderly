@@ -27,12 +27,4 @@ class UserService:
             if check_password_hash(user.hashed_password, password) and email == user.email:
                 return user
         return None
-    def make_traveller(self, user_id: int) -> Optional[Traveller]:
-        user = self.user_data.get_user_by_id(user_id)
-        if user is not None:
-            traveller = self.user_data.create_traveller(user.id)
-            if traveller is not None:
-                self.user_data.save_traveller(traveller)
-                return traveller
-        return None
 

@@ -13,6 +13,6 @@ class Airport(Base):
     name: Mapped[str] = mapped_column()
     location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"))
 
-    location: Mapped["Location"] = relationship("Location", back_populates="airports")
+    location: Mapped["Location"] = relationship("Location", back_populates="airports", cascade="all, delete-orphan")
 
     flights: Mapped[list["Flight"]] = relationship("Flight", back_populates="destination", cascade="all, delete-orphan")
