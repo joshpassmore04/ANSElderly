@@ -3,6 +3,7 @@ from typing import List
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
+from orm.airport.airport import Airport
 from orm.airport.flight import Flight
 from orm.user.luggage import Luggage
 from orm.user.user import User
@@ -20,12 +21,16 @@ class Traveller(User):
     
     flight_id: Mapped[int] = mapped_column(ForeignKey("flights.id"))
     flight: Mapped["Flight"] = relationship(
-        back_populates="travellers"
+        back_populates="travellers", cascade="all, delete-orphan"
     )
+
+    destination_id: Mapped[int] = mapped_column(ForeignKey("airport.id"))
+    destination: Mapped["Airport"] = relationship(cascade="all, delete-orphan")
 
     __mapper_args__ = {
         "polymorphic_identity": "traveller"
     }
+
 
     def verify_passport(self):
         self.passport_verified = True

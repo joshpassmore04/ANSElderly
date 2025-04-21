@@ -16,6 +16,15 @@ class AirportData(ABC):
         pass
 
     @abstractmethod
+    def get_flight_by_attr(self, flight_attr: str) -> Optional[Flight]:
+        pass
+
+    # identifier
+    @abstractmethod
+    def get_flight_by_number(self, name: str) -> Optional[Flight]:
+        pass
+
+    @abstractmethod
     def get_airport_by_id(self, airport_id: int) -> Optional[Airport]:
         pass
 
@@ -36,7 +45,7 @@ class AirportData(ABC):
         pass
 
     @abstractmethod
-    def register_flight(self, aircraft_id: int, to_airport_id: int, arrival_time: datetime, departure_time: datetime = datetime.now()) -> Flight:
+    def register_flight(self, aircraft_id: int, to_airport_id: int, name: str, arrival_time: datetime, departure_time: datetime = datetime.now()) -> Flight:
         pass
 
     @abstractmethod

@@ -1,6 +1,6 @@
 from abc import ABC
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session
@@ -23,6 +23,16 @@ class SQLAlchemyAirportData(AirportData, ABC):
     def get_flight_by_id(self, flight_id: int) -> Optional[Flight]:
         with Session(self.engine) as session:
             return session.get(Flight, flight_id)
+
+    def get_flight_by_number(self, number: str) -> Optional[Flight]:
+        with Session(self.engine) as session:
+            stmt = select(Flight).where(Flight.number == number)
+            return session.execute(stmt).one_or_none()
+
+    def find_flight_by_attribute(self, column_name: str, value: Any) -> Optional[Flight]:
+        with Session(self.engine) as session:
+            stmt = select(Flight).filter_by(**{column_name: value})
+            return session.execute(stmt).scalar_one_or_none()
 
     def get_airport_by_id(self, airport_id: int) -> Optional[Airport]:
         with Session(self.engine) as session:
@@ -63,13 +73,14 @@ class SQLAlchemyAirportData(AirportData, ABC):
         with Session(self.engine) as session:
             return session.get(Luggage, luggage_id)
 
-    def register_flight(self, aircraft_id: int, to_airport_id: int, arrival_time: datetime,
+    def register_flight(self, aircraft_id: int, to_airport_id: int, name: str, arrival_time: datetime,
                         departure_time: datetime = datetime.now()) -> Flight:
         created_flight = Flight(
                 aircraft_id=aircraft_id,
                 to_airport_id=to_airport_id,
                 arrival_time=arrival_time,
                 departure_time=departure_time,
+                name=name,
         )
         self.save_flight(created_flight)
         return created_flight
@@ -96,7 +107,9 @@ class SQLAlchemyAirportData(AirportData, ABC):
 
     def save_flight(self, flight_to_save: Flight):
         with Session(self.engine) as session:
-            session.add(flight_to_save)
+            exists = session.get(Flight, Flight.flight_id)
+            if not exists:
+                session.add(flight_to_save)
             session.commit()
 
 

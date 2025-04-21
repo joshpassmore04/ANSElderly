@@ -3,7 +3,6 @@ from typing import List
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlmodel import SQLModel
 
 from orm import Base, flight_airport_lnk
 from orm.airport.airport import Airport
@@ -11,11 +10,12 @@ from orm.airport.gate import Gate
 from orm.user.traveller import Traveller
 
 
-class Flight(SQLModel):
+class Flight(Base):
 
     __tablename__ = "flight"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    number: Mapped[str] = mapped_column()
 
     gate_id: Mapped[int] = mapped_column(ForeignKey("gate.id"), nullable=False)
     gate: Mapped["Gate"] = relationship("Gate")

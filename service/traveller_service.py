@@ -3,6 +3,7 @@ from typing import Optional
 from data.airport_data import AirportData
 from data.user_data import UserData
 from orm.user.luggage import Luggage
+from orm.user.traveller import Traveller
 
 
 class TravellerService:
@@ -10,19 +11,22 @@ class TravellerService:
         self.user_data = user_data
         self.airport_data = airport_data
 
+    def convert_to_traveller(self, user_id: int) -> Optional[Traveller]:
+        return self.user_data.create_traveller(user_id)
+
     def verify_passport(self, traveller_id: int):
         traveller = self.user_data.get_traveller_by_id(traveller_id)
         if traveller is None:
             raise ValueError(f"Traveller with ID {traveller_id} not found.")
         traveller.verify_passport()
-        self.user_data.save_traveller(traveller)
+        self.user_data.save_user(traveller)
 
     def add_luggage(self, traveller_id: int, luggage: Luggage):
         traveller = self.user_data.get_traveller_by_id(traveller_id)
         if traveller is None:
             raise ValueError(f"Traveller with ID {traveller_id} not found.")
         traveller.add_to_luggage(luggage)
-        self.user_data.save_traveller(traveller)
+        self.user_data.save_user(traveller)
 
     def remove_luggage(self, traveller_id: int, luggage_id: int):
         traveller = self.user_data.get_traveller_by_id(traveller_id)
@@ -32,7 +36,7 @@ class TravellerService:
         if luggage is None:
             raise ValueError(f"Luggage with ID {luggage_id} not found.")
         traveller.remove_from_luggage(luggage)
-        self.user_data.save_traveller(traveller)
+        self.user_data.save_user(traveller)
 
     def add_flight_to(self, traveller_id: int, flight_id: int):
         flight = self.airport_data.get_flight_by_id(flight_id)

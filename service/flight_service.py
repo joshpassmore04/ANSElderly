@@ -1,3 +1,5 @@
+from typing import Optional
+
 from cachetools import TTLCache
 
 from data.airport_data import AirportData
@@ -19,3 +21,7 @@ class FlightService:
     def add_flight(self, flight: Flight):
         self.flight_cache[flight.id] = flight
         self.airport_data.save_flight(flight)
+    def get_by_attribute(self, attribute: str) -> Optional[Flight]:
+        return self.airport_data.get_by_attribute(attribute)
+    def get_flight_by_number(self, flight_number: str) -> Optional[Flight]:
+        return self.airport_data.get_flight_by_number(flight_number)

@@ -3,12 +3,21 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class FlightBase(BaseModel):
-    destination: str
+class FlightCreate(BaseModel):
+    destination_airport_id: int
+    aircraft_id: int
+    gate_id: int
     departure_time: datetime
     arrival_time: datetime
+    number: str
 
-class FlightOut(FlightBase):
+class FlightOut(FlightCreate):
     id: int
+
     class Config:
         orm_mode = True
+
+class FlightQuery(BaseModel):
+    number: str
+
+

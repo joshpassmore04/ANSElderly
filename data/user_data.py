@@ -30,9 +30,13 @@ class UserData(ABC):
     def save_user(self, user: User):
         pass
 
+    @abstractmethod
+    def has_permission(self, user_id: int, permission: str) -> bool:
+        pass
+
     # TODO: Make sure this change cascades
     @abstractmethod
-    def delete_user_by_id(self, user_id: int):
+    def delete_user_by_id(self, user_id: int) -> bool:
         pass
 
 
