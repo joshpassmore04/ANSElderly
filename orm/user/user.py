@@ -22,7 +22,7 @@ class User(Base):
     )
 
     __mapper_args__ = {
-        "polymorphic_on": type,
+        "polymorphic_load": "selectin",
         "polymorphic_identity": "user"
     }
 

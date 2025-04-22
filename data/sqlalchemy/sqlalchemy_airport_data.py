@@ -6,10 +6,10 @@ from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session
 
 from data.airport_data import AirportData
-from orm.airport import flight
 from orm.airport.aircraft import Aircraft
 from orm.airport.airport import Airport
 from orm.airport.flight import Flight
+from orm.airport.gate import Gate
 from orm.airport.location import Location
 from orm.user.luggage import Luggage
 from orm.user.traveller import Traveller
@@ -54,6 +54,17 @@ class SQLAlchemyAirportData(AirportData, ABC):
             session.commit()
             return aircraft
 
+    def register_gate(self, number: int, opening_time: datetime, longitude: float = 0, latitude: float = 0) -> Gate:
+        with Session(self.engine) as session:
+            gate = Gate(
+                number=number,
+                opening_time=opening_time,
+                location=Location(longitude=longitude, latitude=latitude)
+            )
+            session.add(gate)
+            session.commit()
+            return gate
+
     def get_flights_after(self, time: datetime = datetime.now()) -> list[Flight]:
         with Session(self.engine) as session:
             stmt = select(Flight).where(Flight.expected_arrival_time > time)
@@ -73,14 +84,15 @@ class SQLAlchemyAirportData(AirportData, ABC):
         with Session(self.engine) as session:
             return session.get(Luggage, luggage_id)
 
-    def register_flight(self, aircraft_id: int, to_airport_id: int, name: str, arrival_time: datetime,
+    def register_flight(self, aircraft_id: int, to_airport_id: int, gate_id: int, name: str, arrival_time: datetime,
                         departure_time: datetime = datetime.now()) -> Flight:
         created_flight = Flight(
-                aircraft_id=aircraft_id,
-                to_airport_id=to_airport_id,
-                arrival_time=arrival_time,
-                departure_time=departure_time,
-                name=name,
+            aircraft_id=aircraft_id,
+            to_airport_id=to_airport_id,
+            arrival_time=arrival_time,
+            departure_time=departure_time,
+            gate_id=gate_id,
+            name=name,
         )
         self.save_flight(created_flight)
         return created_flight
@@ -107,10 +119,7 @@ class SQLAlchemyAirportData(AirportData, ABC):
 
     def save_flight(self, flight_to_save: Flight):
         with Session(self.engine) as session:
-            exists = session.get(Flight, Flight.flight_id)
+            exists = session.get(Flight, Flight.id)
             if not exists:
                 session.add(flight_to_save)
             session.commit()
-
-
-

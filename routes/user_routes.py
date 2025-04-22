@@ -17,12 +17,13 @@ def create_user_blueprint(base_endpoint, user_service: UserService):
     def login():
 
         try:
+            user_id = g.get("USER_ID")
             user_data = UserCreate(**request.json)
-            if user_data.is_valid():
-                session["USER_ID"] = user_data.id
-                session["USERNAME"] = user_data.username
+            if user_data:
+                session["USER_ID"] = user_id
+                session["USERNAME"] = user_data.first_name + " " + user_data.last_name
                 session["EMAIL"] = str(user_data.email)
-                user = user_service.validate_login(str(user_data.email), user_data.plaintext_password)
+                user = user_service.validate_login(str(user_data.email), user_data.password)
                 if user:
                     user_out = UserOut.model_validate(user)
                     return jsonify(
@@ -41,15 +42,17 @@ def create_user_blueprint(base_endpoint, user_service: UserService):
 
         try:
             user_data = UserCreate(**request.json)
-            if user_data.is_valid():
-                session["USER_ID"] = user_data.id
-                session["USERNAME"] = user_data.username
+            if user_data:
+                print("2")
+                session["USERNAME"] = user_data.first_name + " " + user_data.last_name
                 session["EMAIL"] = str(user_data.email)
                 user = user_service.register_user(first_name=user_data.first_name,
                                                   last_name=user_data.last_name,
                                                   email=str(user_data.email),
-                                                  password=user_data.plaintext_password)
+                                                  password=user_data.password)
+                session["USER_ID"] = user.id
                 if user:
+                    print("3")
                     user_out = UserOut.model_validate(user)
                     return jsonify(
                         {"status": "success", "message": "Registration successful", "session": user_out.model_dump()}), 200
@@ -60,7 +63,8 @@ def create_user_blueprint(base_endpoint, user_service: UserService):
             else:
                 raise InvalidData("Incorrect login")
 
-        except ValidationError:
+        except ValidationError as e:
+            print(e)
             raise InvalidData("Incorrect login")
 
     @user_blueprint.route("/@me")
@@ -94,5 +98,5 @@ def create_user_blueprint(base_endpoint, user_service: UserService):
             return jsonify({"status": "success", "message": "Delete successful"}), 200
         raise ServerError
 
-
+    return user_blueprint
 

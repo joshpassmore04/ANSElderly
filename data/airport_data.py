@@ -5,6 +5,7 @@ from typing import List, Optional
 from orm.airport.aircraft import Aircraft
 from orm.airport.airport import Airport
 from orm.airport.flight import Flight
+from orm.airport.gate import Gate
 from orm.user.luggage import Luggage
 from orm.user.traveller import Traveller
 
@@ -45,7 +46,7 @@ class AirportData(ABC):
         pass
 
     @abstractmethod
-    def register_flight(self, aircraft_id: int, to_airport_id: int, name: str, arrival_time: datetime, departure_time: datetime = datetime.now()) -> Flight:
+    def register_flight(self, aircraft_id: int, to_airport_id: int, gate_id: int, name: str, arrival_time: datetime, departure_time: datetime = datetime.now()) -> Flight:
         pass
 
     @abstractmethod
@@ -54,6 +55,10 @@ class AirportData(ABC):
 
     @abstractmethod
     def register_aircraft(self, name: str, longitude: float = 0, latitude: float = 0) -> Aircraft:
+        pass
+
+    @abstractmethod
+    def register_gate(self, number: int, opening_time: datetime, longitude: float = 0, latitude: float = 0) -> Gate:
         pass
 
     @abstractmethod

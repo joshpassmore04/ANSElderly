@@ -49,6 +49,7 @@ class SQLAlchemyUserData(UserData, ABC):
             if not exists:
                 session.add(user)
             session.commit()
+            session.refresh(user)
 
     def has_permission(self, user_id: int, permission: str) -> bool:
         with Session(self.engine) as session:

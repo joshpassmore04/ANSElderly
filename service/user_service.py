@@ -11,7 +11,7 @@ class UserService:
         self.user_data = user_data
     def register_user(self, first_name: str, last_name: str, email: str, password: str) -> Optional[User]:
         existing_user = self.user_data.get_user_by_email(email)
-        if existing_user is not None:
+        if existing_user is None:
             user = User(first_name=first_name,
                         last_name=last_name,
                         email=email,

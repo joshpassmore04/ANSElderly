@@ -5,9 +5,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from orm import Base, flight_airport_lnk
-from orm.airport.airport import Airport
 from orm.airport.gate import Gate
-from orm.user.traveller import Traveller
 
 
 class Flight(Base):
@@ -37,11 +35,4 @@ class Flight(Base):
         uselist=False,
         back_populates="flights"
     )
-
-    def add_traveller(self, traveller: Traveller):
-        self.travellers.append(traveller)
-
-    def remove_traveller(self, traveller: Traveller):
-        self.travellers.remove(traveller)
-
 

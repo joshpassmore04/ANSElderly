@@ -9,7 +9,6 @@ from orm.user.traveller import Traveller
 from routes.util import login_required
 from service.errors.invalid_data import InvalidData
 from service.flight_service import FlightService
-from service.traveller_service import TravellerService
 from service.user_service import UserService
 
 

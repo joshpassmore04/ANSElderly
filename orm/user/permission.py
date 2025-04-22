@@ -2,7 +2,6 @@ from sqlalchemy import Integer, JSON, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from orm import Base
-from orm.user.user import User
 
 
 class Permission(Base):
@@ -13,5 +12,5 @@ class Permission(Base):
     name: Mapped[str] = mapped_column()
     data: Mapped[dict] = mapped_column(JSON)
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     user: Mapped["User"] = relationship(back_populates="permissions")

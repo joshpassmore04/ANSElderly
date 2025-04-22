@@ -5,9 +5,14 @@ from cachelib import FileSystemCache
 from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
 from flask_session import Session
+from sqlalchemy import create_engine
 
+from data.sqlalchemy.sqlalchemy_user_data import SQLAlchemyUserData
+from orm import Base
+from routes.user_routes import create_user_blueprint
 from service.errors.invalid_data import InvalidData
 from service.errors.server_error import ServerError
+from service.user_service import UserService
 
 
 def create_app():
@@ -21,6 +26,13 @@ def create_app():
     flask_app.config["SESSION_PERMANENT"] = True
     CORS(flask_app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
     Session(flask_app)
+
+    engine = create_engine("sqlite:///:memory:", echo=True)
+    Base.metadata.create_all(engine)
+    user_data = SQLAlchemyUserData(engine)
+    user_service = UserService(user_data)
+
+    flask_app.register_blueprint(create_user_blueprint(flask_app.config["ENDPOINT"], user_service))
 
     @flask_app.errorhandler(InvalidData)
     def handle_invalid_data(exception):
@@ -49,4 +61,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(port=app.config["PORT"])
+    app.run(port=app.config["PORT"], debug=True)

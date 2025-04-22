@@ -3,7 +3,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from orm import Base
 from orm.airport.location import Location
-from orm.user.traveller import Traveller
 
 
 class Luggage(Base):
@@ -17,5 +16,5 @@ class Luggage(Base):
     location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"))
     location: Mapped["Location"] = relationship()
 
-    traveller_id: Mapped[int] = mapped_column(ForeignKey("travellers.id"))
-    owner: Mapped["Traveller"] = relationship("Traveller", back_populates="luggage")
+    traveller_id: Mapped[int] = mapped_column(ForeignKey("traveller.id"))
+    owner: Mapped["Traveller"] = relationship("Traveller")
