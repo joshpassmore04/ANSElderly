@@ -1,20 +1,29 @@
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, EmailStr, model_validator
+from pydantic import BaseModel, ConfigDict, AfterValidator, EmailStr
 
-from service.errors.invalid_data import InvalidData
 
+def is_not_empty(value: Optional[str]) -> Optional[str]:
+    if value is not None and len(value.strip()) == 0:
+        raise ValueError("Field cannot be empty")
+    return value
 
 class UserBase(BaseModel):
-    first_name: str
-    last_name: str
-    email: Optional[EmailStr] = None
+    email: EmailStr
 
-class UserCreate(UserBase):
-    password: str
+class UserRegister(UserBase):
+    first_name: Annotated[str, AfterValidator(is_not_empty)]
+    last_name: Annotated[str, AfterValidator(is_not_empty)]
+    password: Annotated[str, AfterValidator(is_not_empty)]
+
+class UserLogin(UserBase):
+    password: Annotated[str, AfterValidator(is_not_empty)]
 
 class UserOut(UserBase):
     id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        orm_mode = True
+class UserWithPassword(UserOut):
+    first_name: Annotated[str, AfterValidator(is_not_empty)]
+    last_name: Annotated[str, AfterValidator(is_not_empty)]
+    hashed_password: Annotated[str, AfterValidator(is_not_empty)]

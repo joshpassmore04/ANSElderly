@@ -4,6 +4,7 @@ from typing import Optional
 from sqlalchemy import Engine, select, and_
 from sqlalchemy.orm import Session
 
+from data.schema.user import UserOut, UserWithPassword
 from data.user_data import UserData
 from orm.user.permission import Permission
 from orm.user.traveller import Traveller
@@ -15,20 +16,42 @@ class SQLAlchemyUserData(UserData, ABC):
     def __init__(self, engine: Engine):
         self.engine = engine
 
-    def get_user_by_id(self, user_id: int) -> Optional[User]:
+    def get_user_by_id(self, user_id: int) -> Optional[UserOut]:
         with Session(self.engine) as session:
-            return session.get(User, user_id)
+            if user_id is not None:
+                user = session.get(User, user_id)
+                return UserOut.model_validate(user)
+            return None
+
+    def get_user_by_email(self, email: str) -> Optional[UserOut]:
+        with Session(self.engine) as session:
+            stmt = select(User).where(User.email == email)
+            result = session.execute(stmt).scalar()
+            if result is not None:
+                print("4")
+                return UserOut.model_validate(result)
+            print("5")
+            return None
+
+    def validate_user_by_email(self, email: str) -> Optional[UserWithPassword]:
+        with Session(self.engine) as session:
+            stmt = select(User).where(User.email == email)
+            result = session.execute(stmt).scalar()
+            if result is not None:
+                return UserWithPassword.model_validate(result)
+            return None
+
 
     def get_traveller_by_id(self, traveller_id: int) -> Optional[Traveller]:
         with Session(self.engine) as session:
             return session.get(Traveller, traveller_id)
 
-    def create_user(self, first_name: str, last_name: str, email: str, hashed_password: str) -> Optional[User]:
+    def create_user(self, first_name: str, last_name: str, email: str, hashed_password: str) -> Optional[UserOut]:
         user = User(first_name=first_name,
                     last_name=last_name,
                     email=email,
                     hashed_password=hashed_password)
-        self.save_user(user)
+        return self.save_user(user)
 
     def create_traveller(self, user_id: int) -> Optional[Traveller]:
         with Session(self.engine) as session:
@@ -40,16 +63,16 @@ class SQLAlchemyUserData(UserData, ABC):
             )
             session.delete(user)
             session.add(traveller)
+            session.flush()
+            session.refresh(user)
             session.commit()
             return traveller
 
-    def save_user(self, user: User):
+    def save_user(self, user: User) -> UserOut:
         with Session(self.engine) as session:
-            exists = session.get(User, user.id)
-            if not exists:
-                session.add(user)
+            session.add(user)
             session.commit()
-            session.refresh(user)
+            return UserOut.model_validate(user)
 
     def has_permission(self, user_id: int, permission: str) -> bool:
         with Session(self.engine) as session:

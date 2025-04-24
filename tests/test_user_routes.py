@@ -1,9 +1,8 @@
-# Helper function to send registration requests
 def register_user(client, url, email, first_name, last_name, password):
-    return client.post(url, json={"email": email, "first_name": first_name, "last_name": last_name, "password": password})
+    return client.post(url, json={"email": email, "password": password, "first_name": first_name, "last_name": last_name})
 
 # Helper function to send login requests
-def login_user(client, url, email, username, password):
+def login_user(client, url, email, password):
     return client.post(url, json={"email": email, "password": password})
 
 # Helper function to perform a @me request
@@ -15,6 +14,7 @@ def test_new_registration(client, app, endpoint, port):
     print(url)
     with app.app_context():
         response = register_user(client, url, "test@test.com", "john", "smith", "testpassword")
+        print(response.data)  # Print the raw response data
         assert response.status_code == 200
         assert response.json.get("status") == "success"
 
@@ -57,9 +57,13 @@ def test_invalid_registration(client, app, endpoint, port):
         assert response.json.get("message") == "Invalid data provided"
 
 def test_existing_login(client, app, endpoint, port):
-    url = f"http://localhost:{port}{endpoint}user/login"
+    login_url = f"http://localhost:{port}{endpoint}user/login"
+    register_url = f"http://localhost:{port}{endpoint}user/register"
     with app.app_context():
-        response = login_user(client, url, "test@test.com", "username", "testpassword")
+        # # First, register the user
+        # response = register_user(client, register_url, "test@test.com", "john", "smith", "testpassword")
+        # assert response.status_code == 200
+        response = login_user(client, login_url, "test@test.com",  "testpassword")
         assert response.status_code == 200
         assert response.json.get("status") == "success"
 
@@ -67,21 +71,14 @@ def test_invalid_login(client, app, endpoint, port):
     url = f"http://localhost:{port}{endpoint}user/login"
     with app.app_context():
         # Incorrect password
-        response = login_user(client, url, "test@test.com", "username", "testpassword1235")
-        # Check if the response code is an error (400 for bad request)
-        assert response.status_code == 400
-        assert response.json.get("status") == "error"
-        assert response.json.get("message") == "Invalid data provided"
-
-        # Incorrect username
-        response = login_user(client, url, "test@test.com", "username2", "testpassword")
+        response = login_user(client, url, "test@test.com",  "testpassword1234")
         # Check if the response code is an error (400 for bad request)
         assert response.status_code == 400
         assert response.json.get("status") == "error"
         assert response.json.get("message") == "Invalid data provided"
 
         # Incorrect email
-        response = login_user(client, url, "test2@test.com", "username2", "testpassword")
+        response = login_user(client, url, "test2@test.com",  "testpassword")
         # Check if the response code is an error (400 for bad request)
         assert response.status_code == 400
         assert response.json.get("status") == "error"
@@ -95,7 +92,7 @@ def test_session(client, app, endpoint, port):
     with app.test_client() as test_client:
         with app.app_context():
             # Perform login request
-            login_response = login_user(test_client, login_url, "test@test.com", "username", "testpassword")
+            login_response = login_user(test_client, login_url, "test@test.com", "testpassword")
 
             # Assert login is successful
             assert login_response.status_code == 200
@@ -124,7 +121,7 @@ def test_update_user_info(client, app, endpoint, port):
         login_url = f"http://localhost:{port}{endpoint}user/login"
 
         # Login as user 1
-        login_response = login_user(client, login_url, "test@test.com", "username", "testpassword")
+        login_response = login_user(client, login_url, "test@test.com", "testpassword")
         assert login_response.status_code == 200
         assert login_response.json.get("status") == "success"
 

@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from data.schema.user import UserOut, UserWithPassword
 from orm.user.traveller import Traveller
 from orm.user.user import User
 
@@ -8,10 +9,13 @@ from orm.user.user import User
 class UserData(ABC):
 
     @abstractmethod
-    def get_user_by_id(self, user_id: int) -> Optional[User]:
+    def get_user_by_id(self, user_id: int) -> Optional[UserOut]:
         pass
 
-    def get_user_by_email(self, email: str) -> Optional[User]:
+    def get_user_by_email(self, email: str) -> Optional[UserOut]:
+        pass
+
+    def validate_user_by_email(self, email: str) -> Optional[UserWithPassword]:
         pass
 
     @abstractmethod
@@ -19,7 +23,7 @@ class UserData(ABC):
         pass
 
     @abstractmethod
-    def create_user(self, first_name: str, last_name: str, email: str, hashed_password: str) -> Optional[User]:
+    def create_user(self, first_name: str, last_name: str, email: str, hashed_password: str) -> Optional[UserOut]:
         pass
 
     @abstractmethod

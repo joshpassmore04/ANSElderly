@@ -1,11 +1,14 @@
 import json
 import secrets
+import traceback
+import uuid
+from doctest import debug
 
 from cachelib import FileSystemCache
 from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
 from flask_session import Session
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Engine
 
 from data.sqlalchemy.sqlalchemy_user_data import SQLAlchemyUserData
 from orm import Base
@@ -15,7 +18,7 @@ from service.errors.server_error import ServerError
 from service.user_service import UserService
 
 
-def create_app():
+def create_app(engine: Engine):
 
     flask_app = Flask(__name__)
     flask_app.config.from_file("config.json", load=json.load)
@@ -26,20 +29,14 @@ def create_app():
     flask_app.config["SESSION_PERMANENT"] = True
     CORS(flask_app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
     Session(flask_app)
-
-    engine = create_engine("sqlite:///:memory:", echo=True)
     Base.metadata.create_all(engine)
     user_data = SQLAlchemyUserData(engine)
     user_service = UserService(user_data)
 
     flask_app.register_blueprint(create_user_blueprint(flask_app.config["ENDPOINT"], user_service))
 
-    @flask_app.errorhandler(InvalidData)
-    def handle_invalid_data(exception):
-        return jsonify({"status": "error", "message": "Invalid data provided"}), 400
-
     @flask_app.errorhandler(ServerError)
-    def handle_db_error(exception):
+    def handle_db_error():
         message = {
             "status": "error",
             "message": "Internal server error",
@@ -55,10 +52,12 @@ def create_app():
             res.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
             res.headers["Access-Control-Allow-Credentials"] = "true"
             return res
+        return None
 
     return flask_app
 
 
 if __name__ == '__main__':
-    app = create_app()
+    engine = create_engine(f"sqlite:///test.db", echo=False)
+    app = create_app(engine)
     app.run(port=app.config["PORT"], debug=True)

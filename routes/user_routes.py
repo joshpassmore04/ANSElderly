@@ -2,12 +2,14 @@ from flask import Blueprint, session, jsonify, request, g
 from flask_cors import cross_origin
 from pydantic import ValidationError
 
-from data.schema.user import UserCreate, UserOut
+from data.schema.user import UserRegister, UserLogin, UserOut
 from routes.util import login_required
-from service.errors.invalid_data import InvalidData
 from service.errors.server_error import ServerError
 from service.user_service import UserService
 
+
+def invalid_data():
+    return jsonify({"status": "error", "message": "Invalid data provided"}), 400
 
 def create_user_blueprint(base_endpoint, user_service: UserService):
     user_blueprint = Blueprint('user', __name__, url_prefix=base_endpoint + '/user')
@@ -17,31 +19,33 @@ def create_user_blueprint(base_endpoint, user_service: UserService):
     def login():
 
         try:
-            user_id = g.get("USER_ID")
-            user_data = UserCreate(**request.json)
+            print("ONE")
+            user_data = UserLogin(**request.json)
             if user_data:
-                session["USER_ID"] = user_id
-                session["USERNAME"] = user_data.first_name + " " + user_data.last_name
+                print("TWO")
+
                 session["EMAIL"] = str(user_data.email)
                 user = user_service.validate_login(str(user_data.email), user_data.password)
                 if user:
-                    user_out = UserOut.model_validate(user)
+                    session["USER_ID"] = user.id
+                    session["USERNAME"] = user.first_name + " " + user.last_name
                     return jsonify(
-                        {"status": "success", "message": "Login successful", "session": user_out.model_dump()}), 200
+                        {"status": "success", "message": "Login successful", "session": user.model_dump()}), 200
                 else:
-                    raise InvalidData("Incorrect login")
+                    return invalid_data()
             else:
-                raise InvalidData("Incorrect login")
+                return invalid_data()
 
-        except ValidationError:
-            raise InvalidData("Incorrect login")
+        except ValidationError as e:
+            print(e.errors)
+            return invalid_data()
 
     @user_blueprint.route("/register", methods=["POST"])
     @cross_origin(supports_credentials=True)
     def register():
-
         try:
-            user_data = UserCreate(**request.json)
+            user_data = UserRegister(**request.json)
+            print("1")
             if user_data:
                 print("2")
                 session["USERNAME"] = user_data.first_name + " " + user_data.last_name
@@ -50,22 +54,18 @@ def create_user_blueprint(base_endpoint, user_service: UserService):
                                                   last_name=user_data.last_name,
                                                   email=str(user_data.email),
                                                   password=user_data.password)
-                session["USER_ID"] = user.id
                 if user:
+                    session["USER_ID"] = user.id
                     print("3")
-                    user_out = UserOut.model_validate(user)
                     return jsonify(
-                        {"status": "success", "message": "Registration successful", "session": user_out.model_dump()}), 200
+                        {"status": "success", "message": "Registration successful", "session": user.model_dump()}), 200
                 else:
-                    raise InvalidData("Incorrect login")
-
-
+                    return invalid_data()
             else:
-                raise InvalidData("Incorrect login")
-
+                return invalid_data()
         except ValidationError as e:
-            print(e)
-            raise InvalidData("Incorrect login")
+            print(e.errors)
+            return invalid_data()
 
     @user_blueprint.route("/@me")
     @cross_origin(supports_credentials=True)
@@ -75,8 +75,7 @@ def create_user_blueprint(base_endpoint, user_service: UserService):
         user = user_service.get_user_by_id(user_id)
         if user:
             try:
-                user_out = UserOut.model_validate(user)
-                return jsonify({"status": "success", "user": user_out.model_dump()}), 200
+                return jsonify({"status": "success", "user": user.model_dump()}), 200
             except ValidationError:
                 raise ServerError
         else:

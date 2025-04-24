@@ -2,6 +2,7 @@ from typing import Optional
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from data.schema.user import UserOut
 from data.user_data import UserData
 from orm.user.user import User
 
@@ -9,24 +10,20 @@ from orm.user.user import User
 class UserService:
     def __init__(self, user_data: UserData):
         self.user_data = user_data
-    def register_user(self, first_name: str, last_name: str, email: str, password: str) -> Optional[User]:
+    def register_user(self, first_name: str, last_name: str, email: str, password: str) -> Optional[UserOut]:
         existing_user = self.user_data.get_user_by_email(email)
         if existing_user is None:
-            user = User(first_name=first_name,
-                        last_name=last_name,
-                        email=email,
-                        hashed_password=generate_password_hash(password))
-            self.user_data.save_user(user)
-            return user
+            return self.user_data.create_user(first_name=first_name, last_name=last_name, email=email, hashed_password=generate_password_hash(password))
         else:
             return None
-    def validate_login(self, email: str, password: str) -> Optional[User]:
-        user = self.user_data.get_user_by_email(email)
+    def validate_login(self, email: str, password: str) -> Optional[UserOut]:
+        user = self.user_data.validate_user_by_email(email)
+        print("1")
         if user is not None:
             if check_password_hash(user.hashed_password, password) and email == user.email:
-                return user
+                return UserOut.model_validate(user)
         return None
-    def get_user_by_id(self, user_id: int) -> Optional[User]:
+    def get_user_by_id(self, user_id: int) -> Optional[UserOut]:
         return self.user_data.get_user_by_id(user_id)
     def get_traveller_by_id(self, traveller_id: int) -> Optional[User]:
         return self.user_data.get_traveller_by_id(traveller_id)
