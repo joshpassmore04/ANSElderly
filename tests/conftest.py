@@ -12,7 +12,7 @@ engine = create_engine("sqlite:///test.db", echo=False)
 
 @pytest.fixture()
 def app():
-    flask_app = create_app(engine)
+    flask_app = create_app(engine, True)
     flask_app.testing = True
     flask_app.debug = True
     yield flask_app
@@ -29,13 +29,13 @@ def endpoint(app: Flask):
 def port(app: Flask):
     return app.config["PORT"]
 
-def pytest_sessionfinish(exitstatus):
+def pytest_sessionfinish(session, exitstatus):
     engine.dispose()
-
-    db_path = "test.db"
-    if os.path.exists(db_path):
-        try:
-            os.remove(db_path)
-            print(f"[pytest cleanup] Deleted {db_path}")
-        except Exception as e:
-            print(f"[pytest cleanup] Failed to delete {db_path}: {e}")
+    # makes sure db doesn't get deleted if we are testing individual unit tests
+    if len(session.items) > 1:
+        db_path = "test.db"
+        if os.path.exists(db_path):
+            try:
+                os.remove(db_path)
+            except Exception as e:
+                print(f"Failed to cleanup database at {db_path} after running the tests: {e}")

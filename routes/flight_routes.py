@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, g
 from flask_cors import cross_origin
 from pydantic import ValidationError
 
-from data.permission import Permissions
+from data.permission import PermissionType
 from data.schema.flight import FlightOut
 from orm.airport.flight import Flight
 from orm.user.traveller import Traveller
@@ -42,7 +42,7 @@ def create_flight_blueprint(base_endpoint, user_service: UserService, flight_ser
                 else:
                     raise InvalidData
             else:
-                if user_service.has_permission(user_id, Permissions.ACCESS_ALL_FLIGHTS):
+                if user_service.has_permission(user_id, PermissionType.ACCESS_ALL_FLIGHTS):
                     return return_flight(flight)
                 else:
                     raise InvalidData

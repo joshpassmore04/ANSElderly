@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from data.permission import PermissionType, PermissionResult
 from data.schema.user import UserOut, UserWithPassword
+from orm.user.permission import Permission
 from orm.user.traveller import Traveller
 from orm.user.user import User
 
@@ -32,6 +34,14 @@ class UserData(ABC):
 
     @abstractmethod
     def save_user(self, user: User):
+        pass
+
+    @abstractmethod
+    def give_permission(self, to_user_id: int, name: str) -> PermissionResult:
+        pass
+
+    @abstractmethod
+    def remove_permission(self, to_user_id: int, name: str) -> bool:
         pass
 
     @abstractmethod

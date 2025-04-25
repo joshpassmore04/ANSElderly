@@ -4,6 +4,7 @@ from typing import Optional
 from sqlalchemy import Engine, select, and_
 from sqlalchemy.orm import Session
 
+from data.permission import PermissionResult
 from data.schema.user import UserOut, UserWithPassword
 from data.user_data import UserData
 from orm.user.permission import Permission
@@ -73,6 +74,49 @@ class SQLAlchemyUserData(UserData, ABC):
             session.add(user)
             session.commit()
             return UserOut.model_validate(user)
+
+    def give_permission(self, to_user_id: int, name: str) -> PermissionResult:
+        with Session(self.engine) as session:
+            if to_user_id is not None:
+                stmt = select(User).where(User.id == to_user_id)
+                user = session.execute(stmt).scalar()
+                if user:
+                    permission = Permission(
+                        name=name,
+                        user_id=to_user_id,
+                    )
+                    user.permissions.append(permission)
+                    session.add(permission)  # Add just the permission
+                    session.commit()  # Commit all changes (user already in session)
+                    return PermissionResult.SUCCESS
+                return PermissionResult.FAILED
+            return PermissionResult.FAILED
+
+    def remove_permission(self, to_user_id: int, name: str) -> bool:
+        with Session(self.engine) as session:
+            if to_user_id is not None:
+                stmt = select(User).where(User.id == to_user_id)
+                user = session.execute(stmt).scalar()
+
+                if user:
+
+                    permission = session.execute(
+                        select(Permission).where(Permission.name == name, Permission.user_id == to_user_id)
+                    ).scalar()
+
+                    if permission:
+                        try:
+                            user.permissions.remove(permission)
+                            session.commit()  # Commit the transaction after removal
+                            return True
+                        except ValueError:
+                            return False
+                    else:
+                        return False
+                else:
+                    return False
+            else:
+                return False
 
     def has_permission(self, user_id: int, permission: str) -> bool:
         with Session(self.engine) as session:

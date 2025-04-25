@@ -1,6 +1,14 @@
 from datetime import datetime
+from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+
+
+class FlightAttribute(str, Enum):
+    AIRPORT = "airport"
+    AIRCRAFT = "aircraft"
+    GATE = "gate"
+    NUMBER = "number"
 
 
 class FlightCreate(BaseModel):
@@ -13,11 +21,12 @@ class FlightCreate(BaseModel):
 
 class FlightOut(FlightCreate):
     id: int
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class FlightQuery(BaseModel):
-    number: str
+    attribute: FlightAttribute
+    value: str
+
+
 
 

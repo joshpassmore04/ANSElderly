@@ -2,8 +2,11 @@ from typing import Optional
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
+import orm
+from data.permission import PermissionType, PermissionResult
 from data.schema.user import UserOut
 from data.user_data import UserData
+from orm.user.permission import Permission
 from orm.user.user import User
 
 
@@ -29,7 +32,28 @@ class UserService:
         return self.user_data.get_traveller_by_id(traveller_id)
     def delete_user_by_id(self, user_id: int) -> bool:
         return self.user_data.delete_user_by_id(user_id)
-    def has_permission(self, user_id: int, permission: str) -> bool:
-        return self.user_data.has_permission(user_id, permission) is not None
+    def give_permission_from(self, from_user_id: int, to_user_id: int, permission: PermissionType) -> PermissionResult:
+        user = self.user_data.get_user_by_id(from_user_id)
+        if user:
+            if self.has_permission(from_user_id, PermissionType.CAN_UPDATE_OTHERS_PERMISSIONS):
+                return self.give_permission(to_user_id, permission)
+            return PermissionResult.FAILED
+        return PermissionResult.FAILED
+    def give_permission(self, to_user_id: int, permission: PermissionType) -> PermissionResult:
+        if not self.has_permission(to_user_id, permission):
+            return self.user_data.give_permission(to_user_id, permission)
+        else:
+            return PermissionResult.EXISTS
+    def remove_permission_from(self, from_user_id: int, to_user_id: int, permission: PermissionType) -> bool:
+        user = self.user_data.get_user_by_id(from_user_id)
+        if user:
+            if self.has_permission(from_user_id, PermissionType.CAN_UPDATE_OTHERS_PERMISSIONS):
+                return self.remove_permission(to_user_id, permission)
+            return False
+        return False
+    def remove_permission(self, user_id: int, permission: PermissionType) -> bool:
+        return self.user_data.remove_permission(user_id, permission)
+    def has_permission(self, user_id: int, permission: PermissionType) -> bool:
+        return self.user_data.has_permission(user_id, permission)
 
 

@@ -1,8 +1,5 @@
 import json
 import secrets
-import traceback
-import uuid
-from doctest import debug
 
 from cachelib import FileSystemCache
 from flask import Flask, request, Response, jsonify
@@ -13,12 +10,11 @@ from sqlalchemy import create_engine, Engine
 from data.sqlalchemy.sqlalchemy_user_data import SQLAlchemyUserData
 from orm import Base
 from routes.user_routes import create_user_blueprint
-from service.errors.invalid_data import InvalidData
 from service.errors.server_error import ServerError
 from service.user_service import UserService
 
 
-def create_app(engine: Engine):
+def create_app(engine: Engine, debug: bool = False) -> Flask:
 
     flask_app = Flask(__name__)
     flask_app.config.from_file("config.json", load=json.load)
@@ -33,7 +29,7 @@ def create_app(engine: Engine):
     user_data = SQLAlchemyUserData(engine)
     user_service = UserService(user_data)
 
-    flask_app.register_blueprint(create_user_blueprint(flask_app.config["ENDPOINT"], user_service))
+    flask_app.register_blueprint(create_user_blueprint(flask_app.config["ENDPOINT"], user_service, debug))
 
     @flask_app.errorhandler(ServerError)
     def handle_db_error():

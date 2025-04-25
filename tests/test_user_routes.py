@@ -1,3 +1,6 @@
+from data.permission import PermissionType
+
+
 def register_user(client, url, email, first_name, last_name, password):
     return client.post(url, json={"email": email, "password": password, "first_name": first_name, "last_name": last_name})
 
@@ -67,6 +70,7 @@ def test_existing_login(client, app, endpoint, port):
         assert response.status_code == 200
         assert response.json.get("status") == "success"
 
+
 def test_invalid_login(client, app, endpoint, port):
     url = f"http://localhost:{port}{endpoint}user/login"
     with app.app_context():
@@ -113,6 +117,92 @@ def test_session(client, app, endpoint, port):
             # Verify user ID
             assert me_response.json.get("user")["id"] == login_response.json["session"]["id"]
 
+
+# Test the 'give' permission functionality
+def test_permission_give(client, app, endpoint, port):
+    login_url = f"http://localhost:{port}{endpoint}user/login"
+    permission_url = f"http://localhost:{port}{endpoint}user/permission"
+
+    with app.app_context():
+        def post_permission_give():
+            user_update_payload = {
+                "to_id": 1,
+                "permission_name": PermissionType.ACCESS_ALL_FLIGHTS,
+                "action": "give",
+                "debug_bypass": True
+            }
+            return client.post(permission_url, json=user_update_payload)
+
+        # Try unauthenticated request
+        update_response = post_permission_give()
+        assert update_response.status_code == 401
+
+        # Now log in
+        response = login_user(client, login_url, "test@test.com", "testpassword")
+        assert response.status_code == 200
+        assert response.json.get("status") == "success"
+
+        # First attempt to give permission
+        update_response = post_permission_give()
+        assert update_response.status_code == 200
+        assert update_response.json.get("status") == "success"
+
+        # Second attempt to give permission (should fail)
+        update_response = post_permission_give()
+        assert update_response.status_code == 400
+        assert update_response.json.get("message") == "Permission already exists"
+
+
+# Test the 'check' permission functionality
+def test_permission_check(client, app, endpoint, port):
+    login_url = f"http://localhost:{port}{endpoint}user/login"
+    permission_url = f"http://localhost:{port}{endpoint}user/permission"
+
+    with app.app_context():
+        def post_permission_check():
+            user_update_payload = {
+                "to_id": 1,
+                "permission_name": PermissionType.ACCESS_ALL_FLIGHTS,
+                "action": "check_current_user",
+                "debug_bypass": True
+            }
+            return client.post(permission_url, json=user_update_payload)
+
+        # Log in
+        response = login_user(client, login_url, "test@test.com", "testpassword")
+        assert response.status_code == 200
+        assert response.json.get("status") == "success"
+
+        # Check permission
+        check_response = post_permission_check()
+        assert check_response.status_code == 200
+        assert check_response.json.get("status") == "success"
+
+
+# Test the 'remove' permission functionality
+def test_permission_remove(client, app, endpoint, port):
+    login_url = f"http://localhost:{port}{endpoint}user/login"
+    permission_url = f"http://localhost:{port}{endpoint}user/permission"
+
+    with app.app_context():
+        def post_permission_remove():
+            user_update_payload = {
+                "to_id": 1,
+                "permission_name": PermissionType.ACCESS_ALL_FLIGHTS,
+                "action": "remove",
+                "debug_bypass": True
+            }
+            return client.post(permission_url, json=user_update_payload)
+
+        # Log in
+        response = login_user(client, login_url, "test@test.com", "testpassword")
+        assert response.status_code == 200
+        assert response.json.get("status") == "success"
+
+        # Remove permission
+        delete_response = post_permission_remove()
+        assert delete_response.status_code == 200
+        assert delete_response.json.get("status") == "success"
 
 
 def test_update_user_info(client, app, endpoint, port):
