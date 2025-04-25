@@ -2,7 +2,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from orm import Base
-from orm.airport.location import Location
 
 
 class Aircraft(Base):
@@ -13,4 +12,4 @@ class Aircraft(Base):
     capacity: Mapped[int] = mapped_column()
 
     location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"))
-    location: Mapped["Location"] = relationship()
+    location: Mapped["Location"] = relationship("Location")

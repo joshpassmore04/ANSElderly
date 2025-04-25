@@ -57,15 +57,12 @@ class SQLAlchemyUserData(UserData, ABC):
     def create_traveller(self, user_id: int) -> Optional[Traveller]:
         with Session(self.engine) as session:
             user = session.get(User, user_id)
+
             if user is None or isinstance(user, Traveller):
                 return None
-            traveller = Traveller(
-                id=user_id,
-            )
-            session.delete(user)
-            session.add(traveller)
-            session.flush()
-            session.refresh(user)
+
+            traveller = Traveller(id=user_id)
+            session.merge(traveller)
             session.commit()
             return traveller
 

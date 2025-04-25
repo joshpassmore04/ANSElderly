@@ -1,13 +1,12 @@
-from datetime import datetime
-
 from pydantic import BaseModel, ConfigDict
 
 
-class GateCreate(BaseModel):
-    number: int
-    opening_time: datetime
+class LuggageCreate(BaseModel):
+    weight_kg: float
+    capacity: int
     location_id: int
+    traveller_id: int
 
-class GateOut(GateCreate):
+class LuggageOut(LuggageCreate):
     id: int
     model_config = ConfigDict(from_attributes=True)

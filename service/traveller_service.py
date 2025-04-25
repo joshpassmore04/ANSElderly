@@ -18,15 +18,11 @@ class TravellerService:
         traveller = self.user_data.get_traveller_by_id(traveller_id)
         if traveller is None:
             raise ValueError(f"Traveller with ID {traveller_id} not found.")
-        traveller.verify_passport()
+        traveller.passport_verified = True
         self.user_data.save_user(traveller)
 
-    def add_luggage(self, traveller_id: int, luggage: Luggage):
-        traveller = self.user_data.get_traveller_by_id(traveller_id)
-        if traveller is None:
-            raise ValueError(f"Traveller with ID {traveller_id} not found.")
-        traveller.add_to_luggage(luggage)
-        self.user_data.save_user(traveller)
+    def add_luggage(self, traveller_id: int, weight_kg: float, latitude: float, longitude: float) -> bool:
+        return self.airport_data.add_luggage_to_traveller(traveller_id=traveller_id, weight_kg=weight_kg, location_id=location_id)
 
     def remove_luggage(self, traveller_id: int, luggage_id: int):
         traveller = self.user_data.get_traveller_by_id(traveller_id)
@@ -35,7 +31,7 @@ class TravellerService:
         luggage = self.airport_data.get_luggage_by_id(luggage_id)
         if luggage is None:
             raise ValueError(f"Luggage with ID {luggage_id} not found.")
-        traveller.remove_from_luggage(luggage)
+        traveller.luggage_items.remove(luggage)
         self.user_data.save_user(traveller)
 
     def add_flight_to(self, traveller_id: int, flight_id: int):

@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from typing import Union
 
 from pydantic import BaseModel, ConfigDict
 
@@ -12,7 +13,8 @@ class FlightAttribute(str, Enum):
 
 
 class FlightCreate(BaseModel):
-    destination_airport_id: int
+    from_airport_id: int
+    to_airport_id: int
     aircraft_id: int
     gate_id: int
     departure_time: datetime
@@ -25,7 +27,7 @@ class FlightOut(FlightCreate):
 
 class FlightQuery(BaseModel):
     attribute: FlightAttribute
-    value: str
+    value: Union[str, int]
 
 
 

@@ -11,7 +11,7 @@ class Luggage(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     weight_kg: Mapped[float] = mapped_column()
-    contents_verified: Mapped[bool] = mapped_column()
+    contents_verified: Mapped[bool] = mapped_column(default=True)
 
     location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"))
     location: Mapped["Location"] = relationship()

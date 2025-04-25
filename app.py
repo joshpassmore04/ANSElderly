@@ -48,7 +48,6 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
             res.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
             res.headers["Access-Control-Allow-Credentials"] = "true"
             return res
-        return None
 
     return flask_app
 

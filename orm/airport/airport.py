@@ -16,7 +16,22 @@ class Airport(Base):
 
     location: Mapped["Location"] = relationship("Location")
 
-    flights: Mapped[list["Flight"]] = relationship("Flight", back_populates="destination", cascade="all, delete-orphan")
+    # Define the relationship for flights departing from this airport
+    flights_from: Mapped[list["Flight"]] = relationship(
+        "Flight",
+        back_populates="from_airport",
+        cascade="all, delete-orphan",
+        foreign_keys="[Flight.from_airport_id]"  # Explicitly specify the foreign key
+    )
+
+    # Define the relationship for flights arriving at this airport
+    flights_to: Mapped[list["Flight"]] = relationship(
+        "Flight",
+        back_populates="destination",
+        cascade="all, delete-orphan",
+        foreign_keys="[Flight.destination_airport_id]"  # Explicitly specify the foreign key
+    )
 
     def __str__(self):
         return self.name
+

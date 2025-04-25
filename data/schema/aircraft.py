@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
-from orm.airport.location import Location
+from data.schema.location import LocationOut
 
 
 class AircraftCreate(BaseModel):
@@ -10,5 +10,5 @@ class AircraftCreate(BaseModel):
 
 class AircraftOut(BaseModel):
     name: str
-    location: Location
+    location: LocationOut
     model_config = ConfigDict(from_attributes=True)

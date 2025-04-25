@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from data.permission import PermissionType, PermissionResult
+from data.schema.traveller import TravellerOut
 from data.schema.user import UserOut, UserWithPassword
 from orm.user.permission import Permission
 from orm.user.traveller import Traveller
@@ -21,7 +22,7 @@ class UserData(ABC):
         pass
 
     @abstractmethod
-    def get_traveller_by_id(self, traveller_id: int) -> Optional[Traveller]:
+    def get_traveller_by_id(self, traveller_id: int) -> Optional[TravellerOut]:
         pass
 
     @abstractmethod
