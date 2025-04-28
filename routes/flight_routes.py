@@ -2,18 +2,17 @@ from flask import Blueprint, request, jsonify, g
 from flask_cors import cross_origin
 from pydantic import ValidationError
 
-from data.permission import PermissionType
 from data.schema.aircraft import AircraftCreate
 from data.schema.airport import AirportCreate
-from data.schema.flight import FlightQuery, FlightOut, FlightCreate
+from data.schema.flight import FlightQuery, FlightCreate
 from data.schema.gate import GateCreate
 from data.schema.location import LocationCreate
-from routes.util import login_required, invalid_data
+from routes.util import login_required, invalid_data, authentication_required
 from service.flight_service import FlightService
 from service.user_service import UserService
 
 
-def create_airport_blueprint(base_endpoint, user_service: UserService, flight_service: FlightService):
+def create_flight_blueprint(base_endpoint, user_service: UserService, flight_service: FlightService):
     flight_blueprint = Blueprint('airport', __name__, url_prefix=base_endpoint + '/airport')
 
     @flight_blueprint.route("/get-flight", methods=["POST"])
@@ -40,12 +39,13 @@ def create_airport_blueprint(base_endpoint, user_service: UserService, flight_se
         from_user_id = g.get("USER_ID")
         try:
             airport_create = AirportCreate(**request.json)
-            airport = flight_service.register_airport(from_user_id, airport_create.name, airport_create.longitude, airport_create.latitude)
+            airport = flight_service.register_airport(from_user_id, airport_create.name, airport_create.location_id)
             if airport:
                 return jsonify({"status": "success", "message": "Airport created", "airport": airport.model_dump()}), 200
             else:
                 return invalid_data()
-        except ValidationError:
+        except ValidationError as e:
+            print(e)
             return invalid_data()
 
     @flight_blueprint.route("/create-gate", methods=["POST"])
@@ -65,7 +65,7 @@ def create_airport_blueprint(base_endpoint, user_service: UserService, flight_se
             if gate:
                 return jsonify({"status": "success", "message": "Gate created", "gate": gate.model_dump()}), 200
             else:
-                return invalid_data()
+                return authentication_required()
         except ValidationError:
             return invalid_data()
 
@@ -86,7 +86,7 @@ def create_airport_blueprint(base_endpoint, user_service: UserService, flight_se
                 return jsonify(
                     {"status": "success", "message": "Aircraft created", "aircraft": aircraft.model_dump()}), 200
             else:
-                return invalid_data()
+                return authentication_required()
         except ValidationError:
             return invalid_data()
 
@@ -99,14 +99,15 @@ def create_airport_blueprint(base_endpoint, user_service: UserService, flight_se
             location_create = LocationCreate(**request.json)  # LocationCreate should be a Pydantic model for validation
             location = flight_service.register_location(
                 from_user_id,
-                location_create.longitude,
-                location_create.latitude
+                longitude=location_create.longitude,
+                name=location_create.name,
+                latitude=location_create.latitude
             )
             if location:
                 return jsonify(
                     {"status": "success", "message": "Location created", "location": location.model_dump()}), 200
             else:
-                return invalid_data()
+                return authentication_required()
         except ValidationError:
             return invalid_data()
 
@@ -118,6 +119,7 @@ def create_airport_blueprint(base_endpoint, user_service: UserService, flight_se
         try:
             flight_create = FlightCreate(**request.json)  # FlightCreate should be a Pydantic model for validation
             flight = flight_service.register_flight(
+                from_user_id,
                 flight_create.aircraft_id,
                 flight_create.from_airport_id,
                 flight_create.to_airport_id,
@@ -129,10 +131,11 @@ def create_airport_blueprint(base_endpoint, user_service: UserService, flight_se
             if flight:
                 return jsonify({"status": "success", "message": "Flight created", "flight": flight.model_dump()}), 200
             else:
-                return invalid_data()
+                return authentication_required()
         except ValidationError:
             return invalid_data()
 
+    return flight_blueprint
 
 
 

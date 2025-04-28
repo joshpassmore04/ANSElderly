@@ -7,10 +7,13 @@ from flask_cors import CORS
 from flask_session import Session
 from sqlalchemy import create_engine, Engine
 
+from data.sqlalchemy.sqlalchemy_airport_data import SQLAlchemyAirportData
 from data.sqlalchemy.sqlalchemy_user_data import SQLAlchemyUserData
 from orm import Base
+from routes.flight_routes import create_flight_blueprint
 from routes.user_routes import create_user_blueprint
 from service.errors.server_error import ServerError
+from service.flight_service import FlightService
 from service.user_service import UserService
 
 
@@ -26,10 +29,14 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
     CORS(flask_app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
     Session(flask_app)
     Base.metadata.create_all(engine)
+
     user_data = SQLAlchemyUserData(engine)
+    airport_data = SQLAlchemyAirportData(engine)
     user_service = UserService(user_data)
+    flight_service = FlightService(airport_data, user_data)
 
     flask_app.register_blueprint(create_user_blueprint(flask_app.config["ENDPOINT"], user_service, debug))
+    flask_app.register_blueprint(create_flight_blueprint(flask_app.config["ENDPOINT"], user_service, flight_service))
 
     @flask_app.errorhandler(ServerError)
     def handle_db_error():

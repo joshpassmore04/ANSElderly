@@ -32,7 +32,7 @@ class FlightService:
         self.airport_data.save_flight(flight)
     def get_all_by_attribute(self, attribute: str, value) -> list[FlightOut]:
         return self.airport_data.get_flights_by_attribute(attribute, value)
-    def register_airport(self, from_user_id: int, name: str, longitude: float = 0, latitude: float = 0) -> Optional[AirportOut]:
+    def register_airport(self, from_user_id: int, name: str, location_id: int) -> Optional[AirportOut]:
         if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
             return self.airport_data.register_airport(name, longitude, latitude)
         return None
@@ -40,14 +40,16 @@ class FlightService:
         if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
             return self.airport_data.register_gate(number, opening_time, longitude, latitude)
         return None
-    def register_location(self, from_user_id: int, longitude: float = 0, latitude: float = 0) -> Optional[LocationOut]:
+    def register_location(self, from_user_id: int, name: str, longitude: float = 0, latitude: float = 0) -> Optional[LocationOut]:
         if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
-            return self.airport_data.register_location(longitude, latitude)
+            return self.airport_data.register_location(longitude, latitude, name)
         return None
     def register_aircraft(self, from_user_id: int, name: str, longitude: float = 0, latitude: float = 0) -> Optional[AircraftOut]:
         if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
             return self.airport_data.register_aircraft(name, longitude, latitude)
         return None
-    def register_flight(self, aircraft_id: int, from_airport_id: int, to_airport_id: int, gate_id: int, number: str, arrival_time: datetime,
+    def register_flight(self, from_user_id: int, aircraft_id: int, from_airport_id: int, to_airport_id: int, gate_id: int, number: str, arrival_time: datetime,
                         departure_time: datetime = datetime.now()) -> Optional[FlightOut]:
-        return self.airport_data.register_flight(aircraft_id, from_airport_id, to_airport_id, gate_id, number, arrival_time, departure_time)
+        if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
+            return self.airport_data.register_flight(aircraft_id, from_airport_id, to_airport_id, gate_id, number, arrival_time, departure_time)
+        return None

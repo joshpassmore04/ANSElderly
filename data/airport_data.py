@@ -9,7 +9,6 @@ from data.schema.gate import GateOut
 from data.schema.location import LocationOut
 from data.schema.luggage import LuggageOut
 from orm.airport.flight import Flight
-from orm.airport.location import Location
 from orm.user.traveller import Traveller
 
 
@@ -49,6 +48,14 @@ class AirportData(ABC):
         pass
 
     @abstractmethod
+    def add_flight_to(self, traveller_id: int, flight_id: int) -> bool:
+        pass
+
+    @abstractmethod
+    def remove_flight_from(self, traveller_id: int, flight_id: int) -> bool:
+        pass
+
+    @abstractmethod
     def add_luggage_to_traveller(self, weight_kg: float, latitude: float, longitude: float, traveller_id: int) -> bool:
         pass
 
@@ -73,7 +80,7 @@ class AirportData(ABC):
         pass
 
     @abstractmethod
-    def register_location(self, latitude: float, longitude: float) -> LocationOut:
+    def register_location(self, latitude: float, longitude: float, name: str) -> LocationOut:
         pass
 
     @abstractmethod

@@ -16,9 +16,9 @@ class UserService:
     def register_user(self, first_name: str, last_name: str, email: str, password: str) -> Optional[UserOut]:
         existing_user = self.user_data.get_user_by_email(email)
         if existing_user is None:
-            return self.user_data.create_user(first_name=first_name, last_name=last_name, email=email, hashed_password=generate_password_hash(password))
-        else:
-            return None
+            created_user =  self.user_data.create_user(first_name=first_name, last_name=last_name, email=email, hashed_password=generate_password_hash(password))
+            return created_user
+        return None
     def validate_login(self, email: str, password: str) -> Optional[UserOut]:
         user = self.user_data.validate_user_by_email(email)
         print("1")

@@ -22,6 +22,18 @@ from orm.user.luggage import Luggage
 from orm.user.traveller import Traveller
 
 
+def _get_flight_and_traveller(session, flight_id: int, traveller_id: int):
+    flight = session.execute(
+        select(Flight).where(Flight.id == flight_id)
+    ).scalar_one_or_none()
+
+    traveller = session.execute(
+        select(Traveller).where(Traveller.id == traveller_id)
+    ).scalar_one_or_none()
+
+    return flight, traveller
+
+
 class SQLAlchemyAirportData(AirportData, ABC):
 
     def __init__(self, engine: Engine):
@@ -95,6 +107,26 @@ class SQLAlchemyAirportData(AirportData, ABC):
             session.commit()
             return True
 
+    def add_flight_to(self, traveller_id: int, flight_id: int) -> bool:
+        with Session(self.engine) as session:
+            flight, traveller = _get_flight_and_traveller(session, flight_id, traveller_id)
+            if not flight or not traveller:
+                return False
+            flight.travellers.append(traveller)
+            session.commit()
+            return True
+
+    def remove_flight_from(self, traveller_id: int, flight_id: int) -> bool:
+        with Session(self.engine) as session:
+            flight, traveller = _get_flight_and_traveller(session, flight_id, traveller_id)
+            if not flight or not traveller:
+                return False
+            if traveller in flight.travellers:
+                flight.travellers.remove(traveller)
+                session.commit()
+                return True
+            return False
+
     def remove_luggage_from_traveller(self, traveller_id: int, luggage_id: int) -> bool:
         with Session(self.engine) as session:
             traveller_stmt = select(Traveller).where(Traveller.id == traveller_id)
@@ -133,10 +165,10 @@ class SQLAlchemyAirportData(AirportData, ABC):
         self.save_flight(created_flight)
         return FlightOut.make_flight(created_flight)
 
-    def register_location(self, latitude: float, longitude: float) -> LocationOut:
+    def register_location(self, latitude: float, longitude: float, name: str) -> LocationOut:
         with Session(self.engine) as session:
             # Create a new Location instance
-            location = Location(latitude=latitude, longitude=longitude)
+            location = Location(latitude=latitude, longitude=longitude, name=name)
 
             # Add the new location to the session and commit the transaction
             session.add(location)
@@ -182,6 +214,9 @@ class SQLAlchemyAirportData(AirportData, ABC):
         with Session(self.engine) as session:
             stmt = select(Flight).where(Flight.travellers.any(Traveller.id == traveller_id))
             return [FlightOut.make_flight(f) for f in session.execute(stmt).scalars().all()]
+
+    def get_all_aircraft(self) -> list[AircraftOut]:
+        pass
 
     def save_flight(self, flight_to_save: Flight):
         with Session(self.engine) as session:

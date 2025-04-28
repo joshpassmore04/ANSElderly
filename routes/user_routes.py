@@ -152,7 +152,7 @@ def create_user_blueprint(base_endpoint, user_service: UserService, is_debug: bo
                             permission_type=permission_update.permission_name
                         )
                     case PermissionAction.CHECK_CURRENT_USER:
-                        has_permission = user_service.has_permission(from_user_id, permission_update.permission_name)
+                        has_permission = user_service.has_permission(from_user_id, permission_update.permission_name) or debug_bypass
                         return handle_permission_result(has_permission)
                     case _:
                         return invalid_data()
