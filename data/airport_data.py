@@ -68,15 +68,15 @@ class AirportData(ABC):
         pass
 
     @abstractmethod
-    def register_airport(self, name: str, longitude: float = 0, latitude: float = 0) -> AirportOut:
+    def register_airport(self, name: str, location_id: int) -> AirportOut:
         pass
 
     @abstractmethod
-    def register_aircraft(self, name: str, longitude: float = 0, latitude: float = 0) -> AircraftOut:
+    def register_aircraft(self, name: str, location_id: int) -> AircraftOut:
         pass
 
     @abstractmethod
-    def register_gate(self, number: int, opening_time: datetime, longitude: float = 0, latitude: float = 0) -> GateOut:
+    def register_gate(self, number: int, opening_time: datetime, location_id: int) -> GateOut:
         pass
 
     @abstractmethod

@@ -60,21 +60,21 @@ class SQLAlchemyAirportData(AirportData, ABC):
             airport = session.get(Airport, airport_id)
             return AirportOut.model_validate(airport) if airport else None
 
-    def register_airport(self, name: str, longitude: float = 0, latitude: float = 0) -> AirportOut:
+    def register_airport(self, name: str, location_id: int) -> AirportOut:
         with Session(self.engine) as session:
             airport = Airport(name=name, location=Location(latitude=latitude, longitude=longitude))
             session.add(airport)
             session.commit()
             return AirportOut.model_validate(airport)
 
-    def register_aircraft(self, name: str, longitude: float = 0, latitude: float = 0) -> AircraftOut:
+    def register_aircraft(self, name: str, location_id: int) -> AircraftOut:
         with Session(self.engine) as session:
             aircraft = Aircraft(name=name, location=Location(latitude=latitude, longitude=longitude))
             session.add(aircraft)
             session.commit()
             return AircraftOut.model_validate(aircraft)
 
-    def register_gate(self, number: int, opening_time: datetime, longitude: float = 0, latitude: float = 0) -> GateOut:
+    def register_gate(self, number: int, opening_time: datetime, location_id: int) -> GateOut:
         with Session(self.engine) as session:
             gate = Gate(number=number, opening_time=opening_time,
                         location=Location(longitude=longitude, latitude=latitude))

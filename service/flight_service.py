@@ -34,7 +34,7 @@ class FlightService:
         return self.airport_data.get_flights_by_attribute(attribute, value)
     def register_airport(self, from_user_id: int, name: str, location_id: int) -> Optional[AirportOut]:
         if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
-            return self.airport_data.register_airport(name, longitude, latitude)
+            return self.airport_data.register_airport(name, location_id)
         return None
     def register_gate(self, from_user_id: int, number: int, opening_time: datetime, longitude: float = 0, latitude: float = 0) -> Optional[GateOut]:
         if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
