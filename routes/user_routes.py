@@ -3,6 +3,7 @@ from flask_cors import cross_origin
 from pydantic import ValidationError
 
 from data.permission import PermissionType, PermissionAction, PermissionResult
+from data.schema.role import RoleQuery
 from data.schema.user import UserRegister, UserCreate, UserOut, UserUpdatePermission
 from routes.util import login_required, authentication_required, invalid_data
 from service.errors.server_error import ServerError
@@ -36,6 +37,17 @@ def create_user_blueprint(base_endpoint, user_service: UserService, is_debug: bo
                     return invalid_data()
             else:
                 return invalid_data()
+
+        except ValidationError:
+            return invalid_data()
+
+    @user_blueprint.route("/role", methods=["POST"])
+    @cross_origin(supports_credentials=True)
+    @login_required
+    def role():
+        try:
+            role_query = RoleQuery(**request.json)
+            if role_query:
 
         except ValidationError:
             return invalid_data()

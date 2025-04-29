@@ -3,7 +3,7 @@ from typing import Optional
 from werkzeug.security import generate_password_hash, check_password_hash
 
 import orm
-from data.permission import PermissionType, PermissionResult
+from data.permission import PermissionType, PermissionResult, RolePermissions
 from data.schema.user import UserOut
 from data.user_data import UserData
 from orm.user.permission import Permission
@@ -55,5 +55,17 @@ class UserService:
         return self.user_data.remove_permission(user_id, permission)
     def has_permission(self, user_id: int, permission: PermissionType) -> bool:
         return self.user_data.has_permission(user_id, permission)
-
+    def set_role_from(self, from_user_id: int, role: RolePermissions) -> bool:
+        user = self.user_data.get_user_by_id(from_user_id)
+        if user:
+            if self.has_permission(from_user_id, PermissionType.CAN_UPDATE_OTHERS_ROLES):
+                return self.set_role(from_user_id, role)
+            else:
+                return False
+        else:
+            return False
+    def set_role(self, user_id: int, role: RolePermissions) -> bool:
+        return self.user_data.set_role(user_id, role.label)
+    def has_role(self, user_id: int, role: RolePermissions) -> bool:
+        return self.user_data.has_role(user_id, role.label)
 

@@ -10,6 +10,34 @@ class PermissionType(str, Enum):
     CREATE_GATE = "gates.create"
     CREATE_AIRCRAFT = "airports.create"
     CAN_UPDATE_OTHERS_PERMISSIONS = "users.all.permissions.update"
+    CAN_UPDATE_OTHERS_ROLES = "users.all.roles.update"
+
+class RolePermissions(Enum):
+    MANAGER = (
+        "manager",
+        [
+            PermissionType.ACCESS_ALL_FLIGHTS,
+            PermissionType.ACCESS_ALL_AIRPORT_INFO,
+            PermissionType.ADD_LUGGAGE_TO_OTHERS,
+            PermissionType.CREATE_FLIGHTS,
+            PermissionType.CREATE_AIRPORT,
+            PermissionType.CREATE_GATE,
+            PermissionType.CREATE_AIRCRAFT,
+            PermissionType.CAN_UPDATE_OTHERS_PERMISSIONS,
+            PermissionType.CAN_UPDATE_OTHERS_ROLES,
+        ],
+    )
+
+    def __init__(self, label: str, permissions: list[PermissionType]):
+        self.label = label
+        self.permissions = permissions
+
+    @classmethod
+    def from_label(cls, label: str):
+        for role in cls:
+            if role.label == label:
+                return role
+        raise ValueError(f"Invalid role label: {label}")
 
 
 class PermissionAction(str, Enum):
@@ -21,7 +49,3 @@ class PermissionResult(str, Enum):
     SUCCESS = "success"
     FAILED = "failed"
     EXISTS = "exists"
-
-class Role(str, Enum):
-    MANAGER = "manager"
-    USER = "user"

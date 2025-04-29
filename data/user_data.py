@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from data.permission import PermissionType, PermissionResult
+from data.permission import PermissionType, PermissionResult, RolePermissions
 from data.schema.traveller import TravellerOut
 from data.schema.user import UserOut, UserWithPassword
 from orm.user.permission import Permission
@@ -47,6 +47,14 @@ class UserData(ABC):
 
     @abstractmethod
     def has_permission(self, user_id: int, permission: str) -> bool:
+        pass
+
+    @abstractmethod
+    def set_role(self, user_id: int, role: str) -> bool:
+        pass
+
+    @abstractmethod
+    def has_role(self, user_id: int, role: str) -> bool:
         pass
 
     # TODO: Make sure this change cascades

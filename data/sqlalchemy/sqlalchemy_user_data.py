@@ -126,6 +126,30 @@ class SQLAlchemyUserData(UserData, ABC):
             result = session.execute(stmt).scalar_one_or_none()
             return result is not None
 
+    def set_role(self, user_id: int, role: str) -> bool:
+        with Session(self.engine) as session:
+            stmt = select(User).where(User.id == user_id)
+            user = session.execute(stmt).scalar()
+            if user:
+                user.role = role
+                session.commit()
+                return True
+            else:
+                return False
+
+
+    def has_role(self, user_id: int, role: str) -> bool:
+        with Session(self.engine) as session:
+            stmt = select(User).where(User.id == user_id)
+            user = session.execute(stmt).scalar()
+            if user:
+                if user.role == role:
+                    return True
+                else:
+                    return False
+            else:
+                return False
+
     def delete_user_by_id(self, user_id: int) -> bool:
         with Session(self.engine) as session:
             user = session.get(User, user_id)
