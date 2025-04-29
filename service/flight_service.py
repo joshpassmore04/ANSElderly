@@ -36,17 +36,17 @@ class FlightService:
         if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
             return self.airport_data.register_airport(name, location_id)
         return None
-    def register_gate(self, from_user_id: int, number: int, opening_time: datetime, longitude: float = 0, latitude: float = 0) -> Optional[GateOut]:
+    def register_gate(self, from_user_id: int, number: int, opening_time: datetime, location_id: int) -> Optional[GateOut]:
         if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
-            return self.airport_data.register_gate(number, opening_time, longitude, latitude)
+            return self.airport_data.register_gate(number, opening_time, location_id)
         return None
     def register_location(self, from_user_id: int, name: str, longitude: float = 0, latitude: float = 0) -> Optional[LocationOut]:
         if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
             return self.airport_data.register_location(longitude, latitude, name)
         return None
-    def register_aircraft(self, from_user_id: int, name: str, longitude: float = 0, latitude: float = 0) -> Optional[AircraftOut]:
+    def register_aircraft(self, from_user_id: int, name: str, capacity: int, location_id: int) -> Optional[AircraftOut]:
         if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
-            return self.airport_data.register_aircraft(name, longitude, latitude)
+            return self.airport_data.register_aircraft(name=name, location_id=location_id, capacity=capacity)
         return None
     def register_flight(self, from_user_id: int, aircraft_id: int, from_airport_id: int, to_airport_id: int, gate_id: int, number: str, arrival_time: datetime,
                         departure_time: datetime = datetime.now()) -> Optional[FlightOut]:

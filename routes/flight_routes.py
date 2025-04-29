@@ -59,8 +59,7 @@ def create_flight_blueprint(base_endpoint, user_service: UserService, flight_ser
                 from_user_id,
                 gate_create.number,
                 gate_create.opening_time,
-                gate_create.longitude,
-                gate_create.latitude
+                gate_create.location_id
             )
             if gate:
                 return jsonify({"status": "success", "message": "Gate created", "gate": gate.model_dump()}), 200
@@ -79,8 +78,8 @@ def create_flight_blueprint(base_endpoint, user_service: UserService, flight_ser
             aircraft = flight_service.register_aircraft(
                 from_user_id,
                 aircraft_create.name,
-                aircraft_create.longitude,
-                aircraft_create.latitude
+                aircraft_create.capacity,
+                aircraft_create.location_id
             )
             if aircraft:
                 return jsonify(
@@ -132,7 +131,8 @@ def create_flight_blueprint(base_endpoint, user_service: UserService, flight_ser
                 return jsonify({"status": "success", "message": "Flight created", "flight": flight.model_dump()}), 200
             else:
                 return authentication_required()
-        except ValidationError:
+        except ValidationError as e:
+            print(e.errors)
             return invalid_data()
 
     return flight_blueprint

@@ -1,4 +1,4 @@
-from flask import Blueprint, session, jsonify, request, g, abort
+from flask import Blueprint, jsonify, request, g, abort, session
 from flask_cors import cross_origin
 from pydantic import ValidationError
 
@@ -23,11 +23,13 @@ def create_user_blueprint(base_endpoint, user_service: UserService, is_debug: bo
             if user_data:
                 print("TWO")
 
-                session["EMAIL"] = str(user_data.email)
                 user = user_service.validate_login(str(user_data.email), user_data.password)
                 if user:
+                    user = UserOut.model_validate(user.model_dump(exclude={"password"}))
+                    session["EMAIL"] = str(user_data.email)
                     session["USER_ID"] = user.id
-                    session["USERNAME"] = user.first_name + " " + user.last_name
+                    session["FIRST_NAME"] = user.first_name
+                    session["LAST_NAME"] = user.last_name
                     return jsonify(
                         {"status": "success", "message": "Login successful", "session": user.model_dump()}), 200
                 else:
@@ -46,14 +48,11 @@ def create_user_blueprint(base_endpoint, user_service: UserService, is_debug: bo
             print("1")
             if user_data:
                 print("2")
-                session["USERNAME"] = user_data.first_name + " " + user_data.last_name
-                session["EMAIL"] = str(user_data.email)
                 user = user_service.register_user(first_name=user_data.first_name,
                                                   last_name=user_data.last_name,
                                                   email=str(user_data.email),
                                                   password=user_data.password)
                 if user:
-                    session["USER_ID"] = user.id
                     print("3")
                     return jsonify(
                         {"status": "success", "message": "Registration successful", "session": user.model_dump()}), 200
@@ -65,7 +64,7 @@ def create_user_blueprint(base_endpoint, user_service: UserService, is_debug: bo
             print(e.errors)
             return invalid_data()
 
-    @user_blueprint.route("/@me")
+    @user_blueprint.route("/@me", methods=["POST", "GET"])
     @cross_origin(supports_credentials=True)
     @login_required
     def get_current_user():

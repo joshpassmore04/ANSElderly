@@ -72,7 +72,7 @@ class AirportData(ABC):
         pass
 
     @abstractmethod
-    def register_aircraft(self, name: str, location_id: int) -> AircraftOut:
+    def register_aircraft(self, name: str, capacity: int, location_id: int) -> AircraftOut:
         pass
 
     @abstractmethod

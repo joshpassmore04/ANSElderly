@@ -13,6 +13,7 @@ def login_required(func):
     def wrapper(*args, **kwargs):
         # Check if 'USER_ID' is in the session
         user_id = session.get("USER_ID")
+        print(user_id)
         if not user_id:
             return authentication_required()
 

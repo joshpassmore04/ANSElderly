@@ -9,6 +9,7 @@ class AircraftCreate(BaseModel):
     location_id: int
 
 class AircraftOut(BaseModel):
+    id: int
     name: str
     location: LocationOut
     model_config = ConfigDict(from_attributes=True)

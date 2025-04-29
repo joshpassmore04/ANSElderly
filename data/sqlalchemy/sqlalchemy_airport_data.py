@@ -62,14 +62,14 @@ class SQLAlchemyAirportData(AirportData, ABC):
 
     def register_airport(self, name: str, location_id: int) -> AirportOut:
         with Session(self.engine) as session:
-            airport = Airport(name=name, location=Location(latitude=latitude, longitude=longitude))
+            airport = Airport(name=name, location_id=location_id)
             session.add(airport)
             session.commit()
             return AirportOut.model_validate(airport)
 
-    def register_aircraft(self, name: str, location_id: int) -> AircraftOut:
+    def register_aircraft(self, name: str, capacity: int, location_id: int) -> AircraftOut:
         with Session(self.engine) as session:
-            aircraft = Aircraft(name=name, location=Location(latitude=latitude, longitude=longitude))
+            aircraft = Aircraft(name=name, capacity=capacity, location_id=location_id)
             session.add(aircraft)
             session.commit()
             return AircraftOut.model_validate(aircraft)
@@ -77,7 +77,7 @@ class SQLAlchemyAirportData(AirportData, ABC):
     def register_gate(self, number: int, opening_time: datetime, location_id: int) -> GateOut:
         with Session(self.engine) as session:
             gate = Gate(number=number, opening_time=opening_time,
-                        location=Location(longitude=longitude, latitude=latitude))
+                        location_id=location_id)
             session.add(gate)
             session.commit()
             return GateOut.model_validate(gate)
@@ -154,16 +154,19 @@ class SQLAlchemyAirportData(AirportData, ABC):
 
     def register_flight(self, aircraft_id: int, from_airport_id: int, to_airport_id: int, gate_id: int, number: str, arrival_time: datetime,
                         departure_time: datetime = datetime.now()) -> FlightOut:
-        created_flight = Flight(
-            aircraft_id=aircraft_id,
-            destination_airport_id=to_airport_id,
-            expected_arrival_time=arrival_time,
-            leaving_time=departure_time,
-            gate_id=gate_id,
-            number=number,
-        )
-        self.save_flight(created_flight)
-        return FlightOut.make_flight(created_flight)
+        with Session(self.engine) as session:
+            created_flight = Flight(
+                aircraft_id=aircraft_id,
+                from_airport_id=from_airport_id,
+                destination_airport_id=to_airport_id,
+                expected_arrival_time=arrival_time,
+                leaving_time=departure_time,
+                gate_id=gate_id,
+                number=number,
+            )
+            session.add(created_flight)
+            session.commit()
+            return FlightOut.make_flight(created_flight)
 
     def register_location(self, latitude: float, longitude: float, name: str) -> LocationOut:
         with Session(self.engine) as session:

@@ -68,7 +68,7 @@ def airport_id(client, app, endpoint, port, location_id):
     airport_response = client.post(airport_url, json=airport_payload)
     assert airport_response.status_code == 200
     assert airport_response.json.get("status") == "success"
-    return airport_response.json.get("id")
+    return airport_response.json.get("airport").get("id")
 
 @pytest.fixture
 def second_location_id(client, app, endpoint, port):
@@ -82,7 +82,7 @@ def second_location_id(client, app, endpoint, port):
     location_response = client.post(location_url, json=location_payload)
     assert location_response.status_code == 200
     assert location_response.json.get("status") == "success"
-    return location_response.json.get("id")
+    return location_response.json.get("location").get("id")
 
 @pytest.fixture
 def second_airport_id(client, app, endpoint, port, second_location_id):
@@ -94,7 +94,7 @@ def second_airport_id(client, app, endpoint, port, second_location_id):
     airport_response = client.post(airport_url, json=airport_payload)
     assert airport_response.status_code == 200
     assert airport_response.json.get("status") == "success"
-    return airport_response.json.get("id")
+    return airport_response.json.get("airport").get("id")
 
 @pytest.fixture
 def gate_id(client, app, endpoint, port, location_id):
@@ -107,26 +107,27 @@ def gate_id(client, app, endpoint, port, location_id):
     gate_response = client.post(gate_url, json=gate_payload)
     assert gate_response.status_code == 200
     assert gate_response.json.get("status") == "success"
-    return gate_response.json.get("id")
+    return gate_response.json.get("gate").get("id")
 
 @pytest.fixture
 def aircraft_id(client, app, endpoint, port, location_id):
     aircraft_url = f"http://localhost:{port}{endpoint}airport/create-aircraft"
     aircraft_payload = {
         "name": f"Test Aircraft {random.randint(1000,9999)}",
-        "capacity": random.randint(50, 300),
+        "capacity": 50,
         "location_id": location_id,
     }
     aircraft_response = client.post(aircraft_url, json=aircraft_payload)
     assert aircraft_response.status_code == 200
     assert aircraft_response.json.get("status") == "success"
-    return aircraft_response.json.get("id")
+    print(aircraft_response.json)
+    return aircraft_response.json.get("aircraft").get("id")
 
 
-def test_create_airport(client, app, endpoint, port, location_id, airport_id, second_airport_id, aircraft_id, gate_id):
+def test_create_flight(client, app, endpoint, port, location_id, airport_id, second_airport_id, aircraft_id, gate_id):
     login_user_admin(client, app, endpoint, port)
 
-    create_airport_url = f"http://localhost:{port}{endpoint}airport/create-airport"
+    create_airport_url = f"http://localhost:{port}{endpoint}airport/create-flight"
 
     departure_time = datetime.now() + timedelta(days=1)
     arrival_time = departure_time + timedelta(hours=2)
@@ -137,16 +138,18 @@ def test_create_airport(client, app, endpoint, port, location_id, airport_id, se
         "to_airport_id": second_airport_id,
         "aircraft_id": aircraft_id,
         "gate_id": gate_id,
+        "name": "test",
         "departure_time": departure_time.isoformat(),
         "arrival_time": arrival_time.isoformat(),
         "location_id": location_id,
         "number": f"FL{random.randint(1000, 9999)}",
     }
+    print(airport_payload)
 
     airport_response = client.post(create_airport_url, json=airport_payload)
 
     assert airport_response.status_code == 200
     json_data = airport_response.json
     assert json_data.get("status") == "success"
-    assert json_data.get("id") is not None
+    assert json_data.get("flight").get("id") is not None
 
