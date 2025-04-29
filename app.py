@@ -7,6 +7,7 @@ from flask_cors import CORS
 from flask_session import Session
 from sqlalchemy import create_engine, Engine
 
+from data.permission import RolePermissions
 from data.sqlalchemy.sqlalchemy_airport_data import SQLAlchemyAirportData
 from data.sqlalchemy.sqlalchemy_user_data import SQLAlchemyUserData
 from orm import Base
@@ -15,6 +16,20 @@ from routes.user_routes import create_user_blueprint
 from service.errors.server_error import ServerError
 from service.flight_service import FlightService
 from service.user_service import UserService
+
+
+def register_admin_user(user_service: UserService):
+    admin_user = user_service.register_user("John", "Administrator", "admin@test.com", "adminpassword")
+    if admin_user:
+        worked = user_service.promote_user(admin_user.id, RolePermissions.MANAGER)
+        if worked:
+            print("* Created test admin user with the following credentials:")
+            print("email: admin@test.com")
+            print("password: adminpassword")
+    else:
+        print("* Log in to the admin user with the following credentials:")
+        print("email: admin@test.com")
+        print("password: adminpassword")
 
 
 def create_app(engine: Engine, debug: bool = False) -> Flask:
@@ -34,6 +49,8 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
     airport_data = SQLAlchemyAirportData(engine)
     user_service = UserService(user_data)
     flight_service = FlightService(airport_data, user_data)
+
+    register_admin_user(user_service)
 
     flask_app.register_blueprint(create_user_blueprint(flask_app.config["ENDPOINT"], user_service, debug))
     flask_app.register_blueprint(create_flight_blueprint(flask_app.config["ENDPOINT"], user_service, flight_service))
@@ -59,7 +76,11 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
     return flask_app
 
 
-if __name__ == '__main__':
+def create_app_wrapper():
     engine = create_engine(f"sqlite:///test.db", echo=False)
-    app = create_app(engine)
+    return create_app(engine)
+
+
+if __name__ == '__main__':
+    app = create_app_wrapper()
     app.run(port=app.config["PORT"], debug=True)

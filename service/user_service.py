@@ -55,11 +55,11 @@ class UserService:
         return self.user_data.remove_permission(user_id, permission)
     def has_permission(self, user_id: int, permission: PermissionType) -> bool:
         return self.user_data.has_permission(user_id, permission)
-    def set_role_from(self, from_user_id: int, role: RolePermissions) -> bool:
+    def set_role_from(self, from_user_id: int, to_user_id: int, role: RolePermissions) -> bool:
         user = self.user_data.get_user_by_id(from_user_id)
         if user:
             if self.has_permission(from_user_id, PermissionType.CAN_UPDATE_OTHERS_ROLES):
-                return self.set_role(from_user_id, role)
+                return self.set_role(to_user_id, role)
             else:
                 return False
         else:
@@ -68,4 +68,11 @@ class UserService:
         return self.user_data.set_role(user_id, role.label)
     def has_role(self, user_id: int, role: RolePermissions) -> bool:
         return self.user_data.has_role(user_id, role.label)
+    def promote_user(self, user_id: int, role: RolePermissions) -> bool:
+        worked = self.set_role(user_id, role)
+        if worked:
+            for permission in role.permissions:
+                self.give_permission(user_id, permission)
+        return worked
+
 

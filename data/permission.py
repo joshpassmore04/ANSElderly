@@ -11,6 +11,7 @@ class PermissionType(str, Enum):
     CREATE_AIRCRAFT = "airports.create"
     CAN_UPDATE_OTHERS_PERMISSIONS = "users.all.permissions.update"
     CAN_UPDATE_OTHERS_ROLES = "users.all.roles.update"
+    CAN_CHECK_OTHER_ROLES = "users.all.roles.check"
 
 class RolePermissions(Enum):
     MANAGER = (
@@ -25,6 +26,7 @@ class RolePermissions(Enum):
             PermissionType.CREATE_AIRCRAFT,
             PermissionType.CAN_UPDATE_OTHERS_PERMISSIONS,
             PermissionType.CAN_UPDATE_OTHERS_ROLES,
+            PermissionType.CAN_CHECK_OTHER_ROLES,
         ],
     )
 

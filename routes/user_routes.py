@@ -3,7 +3,7 @@ from flask_cors import cross_origin
 from pydantic import ValidationError
 
 from data.permission import PermissionType, PermissionAction, PermissionResult
-from data.schema.role import RoleQuery
+from data.schema.role import RoleQuery, RoleAction
 from data.schema.user import UserRegister, UserCreate, UserOut, UserUpdatePermission
 from routes.util import login_required, authentication_required, invalid_data
 from service.errors.server_error import ServerError
@@ -37,17 +37,6 @@ def create_user_blueprint(base_endpoint, user_service: UserService, is_debug: bo
                     return invalid_data()
             else:
                 return invalid_data()
-
-        except ValidationError:
-            return invalid_data()
-
-    @user_blueprint.route("/role", methods=["POST"])
-    @cross_origin(supports_credentials=True)
-    @login_required
-    def role():
-        try:
-            role_query = RoleQuery(**request.json)
-            if role_query:
 
         except ValidationError:
             return invalid_data()
@@ -171,6 +160,47 @@ def create_user_blueprint(base_endpoint, user_service: UserService, is_debug: bo
                 return invalid_data()
 
         except ValidationError:
+            return invalid_data()
+
+    @user_blueprint.route("/role", methods=["POST"])
+    @cross_origin(supports_credentials=True)
+    @login_required
+    def role():
+        try:
+
+            user_id = g.get("USER_ID")
+            role_query = RoleQuery(**request.json)
+
+            if not role_query:
+                return invalid_data()
+
+            match role_query.action:
+                case RoleAction.SET:
+                    if role_query.debug_bypass and is_debug:
+                        result = user_service.set_role(role_query.user_id, role_query.role)
+                    else:
+                        result = user_service.set_role_from(user_id, role_query.user_id, role_query.role)
+
+                    if result:
+                        return jsonify({"status": "success", "message": "Role change succeeded"}), 200
+                    return authentication_required()
+
+                case RoleAction.CHECK:
+                    can_check = (
+                            user_service.has_permission(user_id, PermissionType.CAN_CHECK_OTHER_ROLES)
+                            or user_id == role_query.user_id
+                    )
+
+                    if not can_check:
+                        return authentication_required()
+
+                    result = user_service.has_role(role_query.user_id, role_query.role)
+
+                    if result:
+                        return jsonify({"status": "success", "message": "Has given role"}), 200
+                    return jsonify({"status": "error", "message": "Does not have given role"}), 400
+
+        except ValidationError as e:
             return invalid_data()
 
     @user_blueprint.route("/delete", methods=["POST"])
