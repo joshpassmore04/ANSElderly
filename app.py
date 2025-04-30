@@ -41,14 +41,10 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
     flask_app.config["SESSION_CACHELIB"] = FileSystemCache(cache_dir="sessions", threshold=500)
     flask_app.config["SESSION_TYPE"] = "cachelib"
     flask_app.config["SESSION_PERMANENT"] = True
-    CORS(
-        flask_app,
-        supports_credentials=True,
-        resources={r"/*": {"origins": [
-            "http://localhost:5173",
-            "https://joshpassmore04.github.io"
-        ]}}
-    )
+    CORS(flask_app, supports_credentials=True, origins=[
+        "http://localhost:5173",  # Local dev
+        "https://joshpassmore04.github.io"  # GitHub Pages
+    ])
     Session(flask_app)
     Base.metadata.create_all(engine)
 
