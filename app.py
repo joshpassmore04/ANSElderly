@@ -66,6 +66,19 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
         }
         return jsonify(message), 500
 
+    @app.before_request
+    def handle_preflight():
+        origin = request.headers.get("Origin")
+        print(f"Origin: {origin}")  # Check what origin is being sent by the frontend
+        if request.method == "OPTIONS":
+            res = Response()
+            if origin:
+                res.headers["Access-Control-Allow-Origin"] = origin
+            res.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS, PUT, DELETE"
+            res.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
+            res.headers["Access-Control-Allow-Credentials"] = "true"
+            return res
+
     return flask_app
 
 
