@@ -1,12 +1,14 @@
 from pydantic import BaseModel, ConfigDict
 
-from data.schema.location import LocationOut
+from data.schema.attributes.location import LocationOut
+from data.schema.attributes.util import FlightAttributeAction
 
 
 class AircraftCreate(BaseModel):
     name: str
     capacity: int
     location_id: int
+    action: FlightAttributeAction
 
 class AircraftOut(BaseModel):
     id: int

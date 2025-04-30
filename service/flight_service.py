@@ -5,11 +5,11 @@ from cachetools import TTLCache
 
 from data.airport_data import AirportData
 from data.permission import PermissionType
-from data.schema.aircraft import AircraftOut
-from data.schema.airport import AirportOut
+from data.schema.attributes.aircraft import AircraftOut
+from data.schema.attributes.airport import AirportOut
 from data.schema.flight import FlightOut
-from data.schema.gate import GateOut
-from data.schema.location import LocationOut
+from data.schema.attributes.gate import GateOut
+from data.schema.attributes.location import LocationOut
 from data.user_data import UserData
 from orm.airport.flight import Flight
 
@@ -30,7 +30,7 @@ class FlightService:
     def add_flight(self, flight: Flight):
         self.flight_cache[flight.id] = flight
         self.airport_data.save_flight(flight)
-    def get_all_by_attribute(self, attribute: str, value) -> list[FlightOut]:
+    def get_flights_by_attribute(self, attribute: str, value) -> list[FlightOut]:
         return self.airport_data.get_flights_by_attribute(attribute, value)
     def register_airport(self, from_user_id: int, name: str, location_id: int) -> Optional[AirportOut]:
         if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
@@ -53,3 +53,11 @@ class FlightService:
         if self.user_data.has_permission(from_user_id, PermissionType.ACCESS_ALL_AIRPORT_INFO):
             return self.airport_data.register_flight(aircraft_id, from_airport_id, to_airport_id, gate_id, number, arrival_time, departure_time)
         return None
+    def get_all_aircraft(self) -> list[AircraftOut]:
+        return self.airport_data.get_all_aircraft()
+    def get_all_gates(self) -> list[GateOut]:
+        return self.airport_data.get_all_gate()
+    def get_all_airports(self) -> list[AirportOut]:
+        return self.airport_data.get_all_airports()
+    def get_all_locations(self) -> list[LocationOut]:
+        return self.airport_data.get_all_location()

@@ -6,11 +6,11 @@ from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session
 
 from data.airport_data import AirportData
-from data.schema.aircraft import AircraftOut
-from data.schema.airport import AirportOut
+from data.schema.attributes.aircraft import AircraftOut
+from data.schema.attributes.airport import AirportOut
 from data.schema.flight import FlightOut
-from data.schema.gate import GateOut
-from data.schema.location import LocationOut
+from data.schema.attributes.gate import GateOut
+from data.schema.attributes.location import LocationOut
 from data.schema.luggage import LuggageOut
 from data.schema.traveller import TravellerOut
 from orm.airport.aircraft import Aircraft

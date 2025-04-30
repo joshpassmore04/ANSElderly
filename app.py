@@ -45,7 +45,7 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
 
     ngrok_url = os.getenv("NGROK_URL")
     origin_list = [
-        "http://localhost:5173",  # Local dev
+        "http://localhost:5173",
         "https://joshpassmore04.github.io"  # GitHub Pages
     ]
     if ngrok_url:

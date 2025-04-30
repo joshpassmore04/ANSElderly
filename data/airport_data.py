@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import List, Optional
 
-from data.schema.aircraft import AircraftOut
-from data.schema.airport import AirportOut
+from data.schema.attributes.aircraft import AircraftOut
+from data.schema.attributes.airport import AirportOut
 from data.schema.flight import FlightOut
-from data.schema.gate import GateOut
-from data.schema.location import LocationOut
+from data.schema.attributes.gate import GateOut
+from data.schema.attributes.location import LocationOut
 from data.schema.luggage import LuggageOut
 from orm.airport.flight import Flight
 from orm.user.traveller import Traveller
