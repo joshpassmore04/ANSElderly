@@ -1,4 +1,5 @@
 import json
+import os
 import secrets
 
 from cachelib import FileSystemCache
@@ -41,10 +42,15 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
     flask_app.config["SESSION_CACHELIB"] = FileSystemCache(cache_dir="sessions", threshold=500)
     flask_app.config["SESSION_TYPE"] = "cachelib"
     flask_app.config["SESSION_PERMANENT"] = True
-    CORS(flask_app, supports_credentials=True, origins=[
+
+    ngrok_url = os.getenv("NGROK_URL")
+    origin_list = [
         "http://localhost:5173",  # Local dev
         "https://joshpassmore04.github.io"  # GitHub Pages
-    ])
+    ]
+    if ngrok_url:
+        origin_list.append(ngrok_url)
+    CORS(flask_app, supports_credentials=True, origins=origin_list)
     Session(flask_app)
     Base.metadata.create_all(engine)
 
@@ -54,6 +60,7 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
     flight_service = FlightService(airport_data, user_data)
 
     register_admin_user(user_service)
+
 
     flask_app.register_blueprint(create_user_blueprint(flask_app.config["ENDPOINT"], user_service, debug))
     flask_app.register_blueprint(create_flight_blueprint(flask_app.config["ENDPOINT"], user_service, flight_service))
