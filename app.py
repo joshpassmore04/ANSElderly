@@ -41,7 +41,14 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
     flask_app.config["SESSION_CACHELIB"] = FileSystemCache(cache_dir="sessions", threshold=500)
     flask_app.config["SESSION_TYPE"] = "cachelib"
     flask_app.config["SESSION_PERMANENT"] = True
-    CORS(flask_app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
+    CORS(
+        flask_app,
+        supports_credentials=True,
+        resources={r"/*": {"origins": [
+            "http://localhost:5173",
+            "https://joshpassmore04.github.io"
+        ]}}
+    )
     Session(flask_app)
     Base.metadata.create_all(engine)
 
@@ -62,16 +69,6 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
             "message": "Internal server error",
         }
         return jsonify(message), 500
-
-    @flask_app.before_request
-    def handle_preflight():
-        if request.method == "OPTIONS":
-            res = Response()
-            res.headers["Access-Control-Allow-Origin"] = request.headers.get("Origin", "*")
-            res.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS, PUT, DELETE"
-            res.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
-            res.headers["Access-Control-Allow-Credentials"] = "true"
-            return res
 
     return flask_app
 
