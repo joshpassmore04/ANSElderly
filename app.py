@@ -51,6 +51,7 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
     if ngrok_url:
         origin_list.append(ngrok_url)
     CORS(flask_app, supports_credentials=True, origins=origin_list)
+    print("* allowed origins: " + ", ".join(origin_list))
     Session(flask_app)
     Base.metadata.create_all(engine)
 
