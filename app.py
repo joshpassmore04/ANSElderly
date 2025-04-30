@@ -66,7 +66,7 @@ def create_app(engine: Engine, debug: bool = False) -> Flask:
         }
         return jsonify(message), 500
 
-    @app.before_request
+    @flask_app.before_request
     def handle_preflight():
         origin = request.headers.get("Origin")
         print(f"Origin: {origin}")  # Check what origin is being sent by the frontend
