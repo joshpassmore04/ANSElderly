@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from data.permission import PermissionType, PermissionResult, RolePermissions
+from data.permission import PermissionType, PermissionResult, RolePermission
 from data.schema.traveller import TravellerOut
 from data.schema.user import UserOut, UserWithPassword
 from orm.user.permission import Permission

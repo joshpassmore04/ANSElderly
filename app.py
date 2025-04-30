@@ -7,7 +7,7 @@ from flask_cors import CORS
 from flask_session import Session
 from sqlalchemy import create_engine, Engine
 
-from data.permission import RolePermissions
+from data.permission import RolePermission
 from data.sqlalchemy.sqlalchemy_airport_data import SQLAlchemyAirportData
 from data.sqlalchemy.sqlalchemy_user_data import SQLAlchemyUserData
 from orm import Base
@@ -21,7 +21,7 @@ from service.user_service import UserService
 def register_admin_user(user_service: UserService):
     admin_user = user_service.register_user("John", "Administrator", "admin@test.com", "adminpassword")
     if admin_user:
-        worked = user_service.promote_user(admin_user.id, RolePermissions.MANAGER)
+        worked = user_service.promote_user(admin_user.id, RolePermission.MANAGER)
         if worked:
             print("* Created test admin user with the following credentials:")
             print("email: admin@test.com")

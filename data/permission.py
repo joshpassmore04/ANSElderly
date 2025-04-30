@@ -13,7 +13,7 @@ class PermissionType(str, Enum):
     CAN_UPDATE_OTHERS_ROLES = "users.all.roles.update"
     CAN_CHECK_OTHER_ROLES = "users.all.roles.check"
 
-class RolePermissions(Enum):
+class RolePermission(Enum):
     MANAGER = (
         "manager",
         [
@@ -28,6 +28,10 @@ class RolePermissions(Enum):
             PermissionType.CAN_UPDATE_OTHERS_ROLES,
             PermissionType.CAN_CHECK_OTHER_ROLES,
         ],
+    )
+    DEFAULT = (
+        "default",
+        []
     )
 
     def __init__(self, label: str, permissions: list[PermissionType]):

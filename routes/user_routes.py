@@ -89,13 +89,13 @@ def create_user_blueprint(base_endpoint, user_service: UserService, is_debug: bo
     def handle_permission_result(result):
         match result:
             case True:
-                return jsonify({"status": "success", "message": "Permission exists"}), 200
+                return jsonify({"status": "success", "message": "Permission exists", "result": True}), 200
             case PermissionResult.SUCCESS:
-                return jsonify({"status": "success", "message": "Permission change succeeded"}), 200
+                return jsonify({"status": "success", "message": "Permission change succeeded", "result": True}), 200
             case PermissionResult.FAILED:
                 return authentication_required()
             case PermissionResult.EXISTS:
-                return jsonify({"status": "failed", "message": "Permission already exists"}), 400
+                return jsonify({"status": "failed", "message": "Permission already exists", "result": False}), 400
             case _:
                 return invalid_data()
 
@@ -182,7 +182,7 @@ def create_user_blueprint(base_endpoint, user_service: UserService, is_debug: bo
                         result = user_service.set_role_from(user_id, role_query.user_id, role_query.role)
 
                     if result:
-                        return jsonify({"status": "success", "message": "Role change succeeded"}), 200
+                        return jsonify({"status": "success", "message": "Role change succeeded", "result": True}), 200
                     return authentication_required()
 
                 case RoleAction.CHECK:
@@ -197,8 +197,10 @@ def create_user_blueprint(base_endpoint, user_service: UserService, is_debug: bo
                     result = user_service.has_role(role_query.user_id, role_query.role)
 
                     if result:
-                        return jsonify({"status": "success", "message": "Has given role"}), 200
-                    return jsonify({"status": "error", "message": "Does not have given role"}), 400
+                        return jsonify({"status": "success", "message": "Has given role", "result": True}), 200
+                    return jsonify({"status": "error", "message": "Does not have given role", "result": False}), 400
+
+            return invalid_data()
 
         except ValidationError as e:
             return invalid_data()
