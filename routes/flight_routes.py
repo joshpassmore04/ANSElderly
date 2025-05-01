@@ -64,7 +64,7 @@ def create_flight_blueprint(base_endpoint, user_service: UserService, flight_ser
         return jsonify({
             "status": "success",
             "message": "Airports found",
-            "airports": [airport.model_dump() for airport in airports]
+            "items": [airport.model_dump() for airport in airports]
         }), 200
 
     # GATE
@@ -96,7 +96,7 @@ def create_flight_blueprint(base_endpoint, user_service: UserService, flight_ser
         return jsonify({
             "status": "success",
             "message": "Gates found",
-            "gates": [gate.model_dump() for gate in gates]
+            "items": [gate.model_dump() for gate in gates]
         }), 200
 
     # AIRCRAFT
@@ -132,7 +132,7 @@ def create_flight_blueprint(base_endpoint, user_service: UserService, flight_ser
         return jsonify({
             "status": "success",
             "message": "Aircraft found",
-            "aircraft": [a.model_dump() for a in aircraft_list]
+            "items": [a.model_dump() for a in aircraft_list]
         }), 200
 
     # LOCATION
@@ -168,7 +168,7 @@ def create_flight_blueprint(base_endpoint, user_service: UserService, flight_ser
         return jsonify({
             "status": "success",
             "message": "Locations found",
-            "locations": [loc.model_dump() for loc in locations]
+            "items": [loc.model_dump() for loc in locations]
         }), 200
 
     @flight_blueprint.route("/create-flight", methods=["POST"])
